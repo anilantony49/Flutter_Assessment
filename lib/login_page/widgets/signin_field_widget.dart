@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 import 'package:flutter_assesment/utils/constants.dart';
 import 'package:flutter_assesment/utils/validations.dart';
- 
+import 'package:flutter_assesment/widgets/custom_button_widget.dart';
+import 'package:flutter_assesment/widgets/custom_text_form_fields_widget.dart';
 
 // ignore: must_be_immutable
 class SignInFieldWidget extends StatefulWidget {
@@ -39,25 +40,25 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
   Future<void> _loginUser(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
 
-    final authProvider = context.read<LoginAuthProvider>();
+    // final authProvider = context.read<LoginAuthProvider>();
 
-    final success = await authProvider.login(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
+    // final success = await authProvider.login(
+    //   email: emailController.text.trim(),
+    //   password: passwordController.text.trim(),
+    // );
 
-    if (success) {
-      customSnackbar(context, 'Login successful!');
-      await Future.delayed(const Duration(milliseconds: 600));
-      nextScreenRemoveUntil(context, const HomePage());
-    } else {
-      customSnackbar(context, authProvider.errorMessage ?? 'Login failed');
-    }
+    // if (success) {
+    //   customSnackbar(context, 'Login successful!');
+    //   await Future.delayed(const Duration(milliseconds: 600));
+    //   nextScreenRemoveUntil(context, const HomePage());
+    // } else {
+    //   customSnackbar(context, authProvider.errorMessage ?? 'Login failed');
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<LoginAuthProvider>();
+    // final authProvider = context.watch<LoginAuthProvider>();
     return FadeInDown(
       delay: const Duration(milliseconds: 400),
       duration: const Duration(milliseconds: 1000),
@@ -113,13 +114,14 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
               CustomTxtFormField(
                 controller: passwordController,
                 hintText: 'Password',
-                obscureText: authProvider.isPasswordHidden,
+                // obscureText: authProvider.isPasswordHidden,
                 suffix: GestureDetector(
                   onTap: authProvider.togglePasswordVisibility,
                   child: Icon(
-                    authProvider.isPasswordHidden
-                        ? Icons.visibility_off
-                        : Icons.visibility,
+                    // authProvider.isPasswordHidden
+                    //     ? Icons.visibility_off
+                    //     :
+                    Icons.visibility,
                     size: 20,
                     color: Theme.of(context).colorScheme.secondary,
                   ),
