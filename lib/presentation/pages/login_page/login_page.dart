@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_assesment/registration_page/widgets/signup_field_widget.dart';
-import 'package:flutter_assesment/registration_page/widgets/signup_widget.dart';
+import 'package:flutter_assesment/presentation/pages/login_page/widgets/signin_field_widget.dart';
+import 'package:flutter_assesment/presentation/pages/login_page/widgets/signin_widgets.dart';
 import 'package:flutter_assesment/widgets/custom_appbar_widget.dart';
  
-class RegistrationPage extends StatelessWidget {
-  const RegistrationPage({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final mediaHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       extendBodyBehindAppBar: true,
-      appBar: CustomAppbar.show(context, true, 'Register'),
+      appBar: CustomAppbar.show(context, false, 'Login'),
       body: SingleChildScrollView(
         child: Container(
-          constraints: BoxConstraints(minHeight: mediaHeight),
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                  SignUpFieldWidget(),
+                SignInFieldWidget(),
                 Positioned(
                   bottom: 0,
-                  child: SignUpWidgets.signInNavigate(context),
+                  child: SignInWidgets.signUpNavigate(context),
                 ),
               ],
             ),

@@ -17,7 +17,8 @@ Future<dynamic> nextScreenRemoveUntil(BuildContext context, Widget page) {
   );
 }
 
-void customSnackbar(
+void customSnackbar( 
+  
   BuildContext context,
   String message, {
   IconData? leading,

@@ -38,6 +38,10 @@ dependencies:
   page_transition: ^2.2.1
   firebase_auth: ^6.1.4
   firebase_core: ^4.4.0
+  cloud_firestore: ^5.2.1
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.8
+  cloud_firestore: ^6.1.2
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_assesment/home_page/widgets/action_card_widget.dart';
-import 'package:flutter_assesment/login_page/login_page.dart';
+import 'package:flutter_assesment/presentation/pages/home_page/widgets/action_card_widget.dart';
+import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
  
 
