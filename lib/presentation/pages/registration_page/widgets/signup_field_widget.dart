@@ -1,14 +1,14 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_assesment/presentation/bloc/password_visibility_bloc.dart';
 import 'package:flutter_assesment/utils/constants.dart';
 import 'package:flutter_assesment/utils/validations.dart';
 import 'package:flutter_assesment/widgets/custom_button_widget.dart';
 import 'package:flutter_assesment/widgets/custom_text_form_fields_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_assesment/presentation/bloc/registration/registration_bloc.dart';
- import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
+import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/home_page.dart';
+import 'package:flutter_assesment/presentation/bloc/password_visibility/password_visibility_bloc.dart';
 
 // ignore: must_be_immutable
 class SignUpFieldWidget extends StatefulWidget {
@@ -155,10 +155,14 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                         obscureText: signUpState.isPasswordHidden,
                         suffix: GestureDetector(
                           onTap: () {
-                            context.read<PasswordVisibilityBloc>().add(TogglePasswordVisibilityEvent());
+                            context.read<PasswordVisibilityBloc>().add(
+                              TogglePasswordVisibilityEvent(),
+                            );
                           },
                           child: Icon(
-                            signUpState.isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                            signUpState.isPasswordHidden
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             size: 20,
                             color: Theme.of(context).colorScheme.secondary,
                           ),
@@ -186,10 +190,14 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                         obscureText: signUpState.isConfirmPasswordHidden,
                         suffix: GestureDetector(
                           onTap: () {
-                            context.read<PasswordVisibilityBloc>().add(ToggleConfirmPasswordVisibilityEvent());
+                            context.read<PasswordVisibilityBloc>().add(
+                              ToggleConfirmPasswordVisibilityEvent(),
+                            );
                           },
                           child: Icon(
-                            signUpState.isConfirmPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                            signUpState.isConfirmPasswordHidden
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             size: 20,
                             color: Theme.of(context).colorScheme.secondary,
                           ),

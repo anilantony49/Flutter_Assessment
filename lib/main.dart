@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_assesment/firebase_options.dart';
 import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
 import 'package:flutter_assesment/presentation/bloc/registration/registration_bloc.dart';
+import 'package:flutter_assesment/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:flutter_assesment/presentation/bloc/user_sign_in/sign_in_bloc.dart';
-import 'package:flutter_assesment/presentation/bloc/password_visibility_bloc.dart';
+import 'package:flutter_assesment/presentation/bloc/password_visibility/password_visibility_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_assesment/utils/theme.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => RegistrationBloc()),
         BlocProvider(create: (context) => PasswordVisibilityBloc()),
         BlocProvider(create: (context) => SignInBloc()),
+        BlocProvider(create: (context) => UserProfileBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

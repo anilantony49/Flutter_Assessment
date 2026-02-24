@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_assesment/models/user_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'registration_event.dart';
@@ -27,6 +29,17 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
       if (credential.user != null) {
         // You can also add full name update logic if needed
         await credential.user!.updateDisplayName(event.fullName);
+
+        final userModel = UserModel(
+          uid: credential.user!.uid,
+          fullName: event.fullName,
+          email: event.email,
+        );
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(credential.user!.uid)
+            .set(userModel.toMap());
 
         emit(
           UserRegistrationSuccessState(

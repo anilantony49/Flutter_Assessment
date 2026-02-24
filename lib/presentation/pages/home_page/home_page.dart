@@ -1,11 +1,27 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_assesment/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/widgets/action_card_widget.dart';
 import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
- 
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      context.read<UserProfileBloc>().add(FetchUserProfileEvent(uid: user.uid));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +29,10 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-
       appBar: AppBar(
-        // backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Home'),
+        backgroundColor: Colors.transparent,
+        title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.w600)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -27,112 +42,155 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [theme.colorScheme.primary, theme.colorScheme.surface],
+            colors: [theme.colorScheme.primary.withOpacity(0.8), theme.colorScheme.surface],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
-
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// Welcome Card
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+          child: BlocBuilder<UserProfileBloc, UserProfileState>(
+            builder: (context, state) {
+              if (state is UserProfileLoading || state is UserProfileInitial) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is UserProfileError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                      const SizedBox(height: 16),
+                      Text(state.message),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            context.read<UserProfileBloc>().add(FetchUserProfileEvent(uid: user.uid));
+                          }
+                        },
+                        child: const Text('Retry'),
                       ),
                     ],
                   ),
-                  child: Row(
+                );
+              } else if (state is UserProfileLoaded) {
+                final user = state.user;
+
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: theme.colorScheme.primary,
-                        child: const Icon(
-                          Icons.person,
-                          size: 30,
-                          color: Colors.white,
+                      /// Welcome Card
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 32,
+                              backgroundColor: theme.colorScheme.primary,
+                              child: Text(
+                                user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : 'U',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Welcome, ${user.fullName} 👋',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    user.email,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Welcome 👋',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+
+                      const SizedBox(height: 32),
+
+                      /// Quick Actions Title
+                      const Text(
+                        'Quick Actions',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Expanded(
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          children: const [
+                            ActionCard(
+                              icon: Icons.person_outline,
+                              label: 'Edit Profile',
+                              color: Colors.blueAccent,
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'You are successfully logged in',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
+                            ActionCard(
+                              icon: Icons.settings_outlined,
+                              label: 'Settings',
+                              color: Colors.lightGreen,
+                            ),
+                            ActionCard(
+                              icon: Icons.notifications_active_outlined,
+                              label: 'Notifications',
+                              color: Colors.orangeAccent,
+                            ),
+                            ActionCard(
+                              icon: Icons.help_outline,
+                              label: 'Help & Support',
+                              color: Colors.purpleAccent,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
+                );
+              }
 
-                const SizedBox(height: 30),
-
-                /// Quick Actions
-                const Text(
-                  'Quick Actions',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-
-                const SizedBox(height: 16),
-
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    children: [
-                      ActionCard(
-                        icon: Icons.person,
-                        label: 'Profile',
-                        color: Colors.blue,
-                      ),
-                      ActionCard(
-                        icon: Icons.settings,
-                        label: 'Settings',
-                        color: Colors.green,
-                      ),
-                      ActionCard(
-                        icon: Icons.notifications,
-                        label: 'Notifications',
-                        color: Colors.orange,
-                      ),
-                      ActionCard(
-                        icon: Icons.help_outline,
-                        label: 'Help',
-                        color: Colors.purple,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              return const SizedBox.shrink();
+            },
           ),
         ),
       ),
@@ -151,16 +209,13 @@ Future<void> _showLogoutConfirmation(BuildContext context) async {
         titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
         contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-
         title: const Text(
           'Confirm Logout',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-
         content: const Text(
           'Are you sure you want to log out?\nYou will need to sign in again.',
         ),
-
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -169,8 +224,8 @@ Future<void> _showLogoutConfirmation(BuildContext context) async {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.onSecondary,
-              foregroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -184,6 +239,7 @@ Future<void> _showLogoutConfirmation(BuildContext context) async {
   );
 
   if (confirm == true) {
-    nextScreenRemoveUntil(context, LoginPage());
+    await FirebaseAuth.instance.signOut();
+    nextScreenRemoveUntil(context, const LoginPage());
   }
 }
