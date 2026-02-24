@@ -116,7 +116,7 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                 hintText: 'Password',
                 // obscureText: authProvider.isPasswordHidden,
                 suffix: GestureDetector(
-                  onTap: authProvider.togglePasswordVisibility,
+                  // onTap: authProvider.togglePasswordVisibility,
                   child: Icon(
                     // authProvider.isPasswordHidden
                     //     ? Icons.visibility_off

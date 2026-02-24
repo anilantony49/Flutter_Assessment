@@ -1,5 +1,6 @@
  import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_assesment/registration_page/registration_page.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
  
 
