@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_assesment/models/user_model.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_assesment/data/models/user_model.dart';
+ import 'package:meta/meta.dart';
 
 part 'user_profile_event.dart';
 part 'user_profile_state.dart';

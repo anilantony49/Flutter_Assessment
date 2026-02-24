@@ -92,3 +92,64 @@ var lightTheme = ThemeData(
     headlineLarge: TextStyle(fontVariations: fontWeightRegular, color: lBlack),
   ),
 );
+
+var darkTheme = ThemeData(
+  useMaterial3: false,
+  fontFamily: mainFont,
+  unselectedWidgetColor: lGray,
+  splashColor: Colors.transparent,
+  highlightColor: Colors.transparent,
+  splashFactory: NoSplash.splashFactory,
+  colorScheme: const ColorScheme(
+    brightness: Brightness.dark,
+    primary: lWhite, // Icon || Text Primary Color
+    onPrimary: lBlue, // Selected Color
+    primaryContainer: Color(0xFF1E1E1E), // Card Color
+    onPrimaryContainer: Color(0xFF1E1E1E), // Button Color
+    secondary: lGray, // Text Color Secondary
+    onSecondary: Color(0xFF333333), // Text Light Color
+    outline: Color(0xFF444444), // Divider Color
+    outlineVariant: Color(0xFF555555), // Loading Button & Text Color
+    surface: Color(0xFF121212), // Background Color
+    onSurface: dLightBlueGrey2, // Loading Skelton Color
+    tertiary: lDialog, // For Remove Dialog On Detail
+    onTertiary: lDialog2, // For Remove Dialog On Home
+    surfaceTint: lPDialog2, // For User Profile More
+    scrim: lLightGrey,
+    error: Colors.redAccent,
+    onError: Colors.redAccent,
+  ),
+  listTileTheme: const ListTileThemeData(iconColor: lWhite, textColor: lWhite),
+  bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xFF1E1E1E)),
+  appBarTheme: AppBarTheme(
+    backgroundColor: const Color(0xFF121212),
+    elevation: 0,
+    surfaceTintColor: Colors.transparent,
+    titleTextStyle: TextStyle(
+      color: lWhite,
+      fontFamily: mainFont,
+      fontSize: 20,
+      fontVariations: fontWeightRegular,
+    ),
+    iconTheme: const IconThemeData(color: lWhite),
+  ),
+  iconTheme: const IconThemeData(color: lWhite),
+  scaffoldBackgroundColor: const Color(0xFF121212),
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    bodyMedium: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    bodySmall: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    labelSmall: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    labelMedium: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    labelLarge: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    displaySmall: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    displayMedium: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    displayLarge: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    titleSmall: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    titleMedium: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    titleLarge: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    headlineSmall: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    headlineMedium: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+    headlineLarge: TextStyle(fontVariations: fontWeightRegular, color: lWhite),
+  ),
+);

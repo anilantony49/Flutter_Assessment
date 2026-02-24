@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_assesment/presentation/bloc/theme/theme_bloc.dart';
 import 'package:flutter_assesment/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/widgets/action_card_widget.dart';
 import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       context.read<UserProfileBloc>().add(FetchUserProfileEvent(uid: user.uid));
+      context.read<ThemeBloc>().add(LoadThemeEvent());
     }
   }
 
@@ -35,6 +37,20 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.w600)),
         centerTitle: true,
         actions: [
+          BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, state) {
+              return IconButton(
+                tooltip: 'Toggle Theme',
+                icon: Icon(
+                  state.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  final newMode = state.themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                  context.read<ThemeBloc>().add(ChangeThemeEvent(newMode));
+                },
+              );
+            },
+          ),
           IconButton(
             tooltip: 'Logout',
             icon: const Icon(Icons.logout),

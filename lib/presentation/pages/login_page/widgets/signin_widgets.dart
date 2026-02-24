@@ -1,8 +1,7 @@
- import 'package:animate_do/animate_do.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/presentation/pages/registration_page/registration_page.dart';
- import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
- 
+import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 
 class SignInWidgets {
   static InkWell signUpNavigate(BuildContext context) {
