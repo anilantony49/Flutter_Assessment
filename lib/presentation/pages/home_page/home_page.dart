@@ -142,9 +142,7 @@ class _HomePageState extends State<HomePage> {
                               radius: 32,
                               backgroundColor: theme.colorScheme.primary,
                               child: Text(
-                                user.fullName.isNotEmpty
-                                    ? user.fullName.toUpperCase()
-                                    : 'U',
+                                user.fullName.toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,

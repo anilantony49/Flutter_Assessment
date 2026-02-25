@@ -31,7 +31,7 @@ class TaskModel extends TaskEntity {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      if (id != null) 'id': id,
       'title': title,
       'description': description,
       'is_completed': isCompleted,
@@ -65,6 +65,8 @@ class TaskModel extends TaskEntity {
       'priority': priority,
       'category': category,
       'due_date': dueDate?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
@@ -77,6 +79,8 @@ class TaskModel extends TaskEntity {
       priority: map['priority'],
       category: map['category'],
       dueDate: map['due_date'] != null ? DateTime.parse(map['due_date']) : null,
+      createdAt: map['created_at'] != null ? DateTime.parse(map['created_at']) : null,
+      updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
     );
   }
 }

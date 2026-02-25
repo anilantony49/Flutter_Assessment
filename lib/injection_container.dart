@@ -5,6 +5,7 @@ import 'package:flutter_assesment/data/repositories/task_repository_impl.dart';
 import 'package:flutter_assesment/domain/repositories/task_repository.dart';
 import 'package:flutter_assesment/domain/usecases/task_usecases.dart';
 import 'package:flutter_assesment/presentation/bloc/task/task_bloc.dart';
+import 'package:flutter_assesment/core/network/api_constants.dart';
 import 'package:get_it/get_it.dart';
 
 final sl = GetIt.instance; // sl: Service Locator
@@ -36,7 +37,7 @@ Future<void> init() async {
 
   // External
   sl.registerLazySingleton(() => Dio(BaseOptions(
-        baseUrl: 'https://taskmanager.uat-lplusltd.com',
+        baseUrl: ApiConstants.baseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       )));

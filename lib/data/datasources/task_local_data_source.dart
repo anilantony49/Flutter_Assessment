@@ -23,8 +23,9 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Incremented version
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -37,15 +38,24 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
         is_completed INTEGER NOT NULL,
         priority TEXT NOT NULL,
         category TEXT NOT NULL,
-        due_date TEXT
+        due_date TEXT,
+        created_at TEXT,
+        updated_at TEXT
       )
     ''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE tasks ADD COLUMN created_at TEXT');
+      await db.execute('ALTER TABLE tasks ADD COLUMN updated_at TEXT');
+    }
   }
 
   @override
   Future<List<TaskModel>> getTasks() async {
     final db = await database;
-    final result = await db.query('tasks');
+    final result = await db.query('tasks', orderBy: 'id DESC');
     return result.map((json) => TaskModel.fromLocalMap(json)).toList();
   }
 
