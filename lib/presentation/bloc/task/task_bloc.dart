@@ -9,6 +9,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final UpdateTaskUseCase updateTaskUseCase;
   final DeleteTaskUseCase deleteTaskUseCase;
 
+  final SyncTasksUseCase syncTasksUseCase;
+
   int _currentSkip = 0;
   final int _limit = 10;
 
@@ -17,6 +19,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     required this.createTaskUseCase,
     required this.updateTaskUseCase,
     required this.deleteTaskUseCase,
+    required this.syncTasksUseCase,
   }) : super(TaskInitial()) {
     on<LoadTasksEvent>((event, emit) async {
       emit(TaskLoading());
@@ -96,6 +99,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         add(LoadTasksEvent(event.userId)); // Refresh list
         emit(TaskActionSuccess('Task deleted successfully'));
       });
+    });
+
+    on<SyncTasksEvent>((event, emit) async {
+      await syncTasksUseCase(event.userId);
+      add(LoadTasksEvent(event.userId)); // Refresh list after sync
     });
   }
 }

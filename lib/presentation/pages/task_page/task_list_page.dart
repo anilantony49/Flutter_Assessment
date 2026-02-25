@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
 
 class TaskListPage extends StatefulWidget {
   const TaskListPage({super.key});
@@ -23,6 +25,9 @@ class _TaskListPageState extends State<TaskListPage> {
   List<TaskEntity> _allTasks = [];
   bool _hasReachedMax = false;
   String _sortBy = 'Created Date'; // Created Date, Due Date, Priority
+  
+  bool _isConnected = true;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   @override
   void initState() {
@@ -32,12 +37,25 @@ class _TaskListPageState extends State<TaskListPage> {
     _searchController.addListener(() {
       setState(() {}); // Trigger rebuild to filter client-side
     });
+    
+    // Connectivity listener
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+      final connected = !results.contains(ConnectivityResult.none);
+      if (connected && !_isConnected) {
+        // Just restored connection
+        _syncTasks();
+      }
+      setState(() {
+        _isConnected = connected;
+      });
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 
@@ -61,6 +79,13 @@ class _TaskListPageState extends State<TaskListPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       context.read<TaskBloc>().add(LoadTasksEvent(user.uid));
+    }
+  }
+
+  void _syncTasks() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      context.read<TaskBloc>().add(SyncTasksEvent(user.uid));
     }
   }
 
@@ -165,6 +190,23 @@ class _TaskListPageState extends State<TaskListPage> {
       ),
       body: Column(
         children: [
+          if (!_isConnected)
+            Container(
+              width: double.infinity,
+              color: Colors.redAccent,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                  SizedBox(width: 8),
+                  Text(
+                    'You are offline. Actions will sync when online.',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
           // Search and Filter Bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

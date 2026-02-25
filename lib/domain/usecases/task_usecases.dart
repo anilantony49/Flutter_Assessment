@@ -38,3 +38,12 @@ class DeleteTaskUseCase {
     return repository.deleteTask(userId, taskId);
   }
 }
+
+class SyncTasksUseCase {
+  final TaskRepository repository;
+  SyncTasksUseCase(this.repository);
+
+  Future<void> call(String userId) {
+    return repository.syncPendingActions(userId);
+  }
+}

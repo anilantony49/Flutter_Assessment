@@ -48,3 +48,10 @@ class DeleteTaskEvent extends TaskEvent {
   @override
   List<Object?> get props => [userId, taskId];
 }
+
+class SyncTasksEvent extends TaskEvent {
+  final String userId;
+  SyncTasksEvent(this.userId);
+  @override
+  List<Object?> get props => [userId];
+}
