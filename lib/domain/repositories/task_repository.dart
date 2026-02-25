@@ -18,4 +18,5 @@ abstract class TaskRepository {
     Map<String, dynamic> data,
   );
   Future<Either<Failure, void>> deleteTask(String userId, int taskId);
+  Future<void> syncPendingActions(String userId);
 }
