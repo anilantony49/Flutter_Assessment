@@ -4,6 +4,7 @@ import 'package:flutter_assesment/presentation/bloc/theme/theme_bloc.dart';
 import 'package:flutter_assesment/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/widgets/action_card_widget.dart';
 import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
+import 'package:flutter_assesment/presentation/pages/task_page/task_list_page.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      // print(user);
       context.read<UserProfileBloc>().add(FetchUserProfileEvent(uid: user.uid));
       context.read<ThemeBloc>().add(LoadThemeEvent());
     }
@@ -34,7 +36,10 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.w600)),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         centerTitle: true,
         actions: [
           BlocBuilder<ThemeBloc, ThemeState>(
@@ -42,10 +47,15 @@ class _HomePageState extends State<HomePage> {
               return IconButton(
                 tooltip: 'Toggle Theme',
                 icon: Icon(
-                  state.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                  state.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
                 ),
                 onPressed: () {
-                  final newMode = state.themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                  final newMode =
+                      state.themeMode == ThemeMode.dark
+                          ? ThemeMode.light
+                          : ThemeMode.dark;
                   context.read<ThemeBloc>().add(ChangeThemeEvent(newMode));
                 },
               );
@@ -63,7 +73,10 @@ class _HomePageState extends State<HomePage> {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [theme.colorScheme.primary.withOpacity(0.8), theme.colorScheme.surface],
+            colors: [
+              theme.colorScheme.primary.withOpacity(0.8),
+              theme.colorScheme.surface,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -78,7 +91,11 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(height: 16),
                       Text(state.message),
                       const SizedBox(height: 16),
@@ -86,7 +103,9 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () {
                           final user = FirebaseAuth.instance.currentUser;
                           if (user != null) {
-                            context.read<UserProfileBloc>().add(FetchUserProfileEvent(uid: user.uid));
+                            context.read<UserProfileBloc>().add(
+                              FetchUserProfileEvent(uid: user.uid),
+                            );
                           }
                         },
                         child: const Text('Retry'),
@@ -122,7 +141,9 @@ class _HomePageState extends State<HomePage> {
                               radius: 32,
                               backgroundColor: theme.colorScheme.primary,
                               child: Text(
-                                user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : 'U',
+                                user.fullName.isNotEmpty
+                                    ? user.fullName.toUpperCase()
+                                    : 'U',
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -149,7 +170,8 @@ class _HomePageState extends State<HomePage> {
                                     user.email,
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.7),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -166,7 +188,10 @@ class _HomePageState extends State<HomePage> {
                       /// Quick Actions Title
                       const Text(
                         'Quick Actions',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
 
                       const SizedBox(height: 16),
@@ -176,23 +201,26 @@ class _HomePageState extends State<HomePage> {
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
-                          children: const [
+                          children: [
                             ActionCard(
+                              icon: Icons.task_outlined,
+                              label: 'My Tasks',
+                              color: Colors.deepPurpleAccent,
+                              onTap:
+                                  () =>
+                                      nextScreen(context, const TaskListPage()),
+                            ),
+                            const ActionCard(
                               icon: Icons.person_outline,
                               label: 'Edit Profile',
                               color: Colors.blueAccent,
                             ),
-                            ActionCard(
+                            const ActionCard(
                               icon: Icons.settings_outlined,
                               label: 'Settings',
                               color: Colors.lightGreen,
                             ),
-                            ActionCard(
-                              icon: Icons.notifications_active_outlined,
-                              label: 'Notifications',
-                              color: Colors.orangeAccent,
-                            ),
-                            ActionCard(
+                            const ActionCard(
                               icon: Icons.help_outline,
                               label: 'Help & Support',
                               color: Colors.purpleAccent,

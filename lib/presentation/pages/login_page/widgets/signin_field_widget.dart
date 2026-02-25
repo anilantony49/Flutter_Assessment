@@ -65,7 +65,8 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
       },
       builder: (context, state) {
         final isLoading = state is UserSignInLoadingState;
-        final isPasswordHidden = state is SignInBaseState ? state.isPasswordHidden : true;
+        final isPasswordHidden =
+            state is SignInBaseState ? state.isPasswordHidden : true;
 
         return FadeInDown(
           delay: const Duration(milliseconds: 400),
@@ -109,7 +110,8 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                       if (val == null || val.isEmpty) {
                         return 'Email is required';
                       }
-                      if (!RegExp(emailRegexPattern).hasMatch(val) || val.isEmpty) {
+                      if (!RegExp(emailRegexPattern).hasMatch(val) ||
+                          val.isEmpty) {
                         return 'Enter a valid email';
                       }
                       return null;
@@ -125,10 +127,14 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                     obscureText: isPasswordHidden,
                     suffix: GestureDetector(
                       onTap: () {
-                        context.read<SignInBloc>().add(ToggleSignInPasswordVisibilityEvent());
+                        context.read<SignInBloc>().add(
+                          ToggleSignInPasswordVisibilityEvent(),
+                        );
                       },
                       child: Icon(
-                        isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                        isPasswordHidden
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         size: 20,
                         color: Theme.of(context).colorScheme.secondary,
                       ),

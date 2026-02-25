@@ -9,10 +9,13 @@ import 'package:flutter_assesment/presentation/bloc/user_sign_in/sign_in_bloc.da
 import 'package:flutter_assesment/presentation/bloc/password_visibility/password_visibility_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_assesment/utils/theme.dart';
+import 'package:flutter_assesment/injection_container.dart' as di;
+import 'package:flutter_assesment/presentation/bloc/task/task_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await di.init();
   runApp(const MyApp());
 }
 
@@ -29,6 +32,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => SignInBloc()),
         BlocProvider(create: (context) => UserProfileBloc()),
         BlocProvider(create: (context) => ThemeBloc()..add(LoadThemeEvent())),
+        BlocProvider(create: (context) => di.sl<TaskBloc>()),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {

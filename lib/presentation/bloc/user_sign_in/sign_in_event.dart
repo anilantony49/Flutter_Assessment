@@ -7,10 +7,7 @@ class UserSignInEvent extends SignInEvent {
   final String email;
   final String password;
 
-  UserSignInEvent({
-    required this.email,
-    required this.password,
-  });
+  UserSignInEvent({required this.email, required this.password});
 }
 
 class ToggleSignInPasswordVisibilityEvent extends SignInEvent {}
