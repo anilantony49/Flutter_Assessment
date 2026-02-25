@@ -8,7 +8,18 @@ abstract class TaskEvent extends Equatable {
 
 class LoadTasksEvent extends TaskEvent {
   final String userId;
-  LoadTasksEvent(this.userId);
+  final int skip;
+  final int limit;
+
+  LoadTasksEvent(this.userId, {this.skip = 0, this.limit = 10});
+
+  @override
+  List<Object?> get props => [userId, skip, limit];
+}
+
+class LoadMoreTasksEvent extends TaskEvent {
+  final String userId;
+  LoadMoreTasksEvent(this.userId);
   @override
   List<Object?> get props => [userId];
 }

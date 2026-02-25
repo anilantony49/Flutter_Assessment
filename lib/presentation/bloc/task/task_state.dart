@@ -12,9 +12,29 @@ class TaskLoading extends TaskState {}
 
 class TasksLoaded extends TaskState {
   final List<TaskEntity> tasks;
-  TasksLoaded(this.tasks);
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  TasksLoaded({
+    required this.tasks,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
   @override
-  List<Object?> get props => [tasks];
+  List<Object?> get props => [tasks, hasReachedMax, isLoadingMore];
+
+  TasksLoaded copyWith({
+    List<TaskEntity>? tasks,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return TasksLoaded(
+      tasks: tasks ?? this.tasks,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class TaskActionSuccess extends TaskState {

@@ -16,15 +16,17 @@ class TaskRepositoryImpl implements TaskRepository {
   });
 
   @override
-  Future<Either<Failure, List<TaskEntity>>> getTasks(String userId) async {
+  Future<Either<Failure, List<TaskEntity>>> getTasks(String userId, {int skip = 0, int limit = 10}) async {
     try {
-      final remoteTasks = await remoteDataSource.getTasks(userId);
-      await localDataSource.cacheTasks(remoteTasks);
+      final remoteTasks = await remoteDataSource.getTasks(userId, skip: skip, limit: limit);
+      await localDataSource.cacheTasks(remoteTasks, isFirstPage: skip == 0);
       return Right(remoteTasks);
     } catch (e) {
       try {
         final localTasks = await localDataSource.getTasks();
         if (localTasks.isNotEmpty) {
+          // If offline, we might return all cached tasks or just the first set.
+          // For simplicity, we return everything cached if they are offline.
           return Right(localTasks);
         }
         return Left(ServerFailure(e.toString()));

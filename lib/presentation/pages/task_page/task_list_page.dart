@@ -5,7 +5,6 @@ import 'package:flutter_assesment/presentation/bloc/task/task_event.dart';
 import 'package:flutter_assesment/presentation/bloc/task/task_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 import 'package:animate_do/animate_do.dart';
 
 class TaskListPage extends StatefulWidget {
@@ -16,10 +15,35 @@ class TaskListPage extends StatefulWidget {
 }
 
 class _TaskListPageState extends State<TaskListPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     _loadTasks();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        context.read<TaskBloc>().add(LoadMoreTasksEvent(user.uid));
+      }
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   void _loadTasks() {
@@ -27,6 +51,13 @@ class _TaskListPageState extends State<TaskListPage> {
     if (user != null) {
       context.read<TaskBloc>().add(LoadTasksEvent(user.uid));
     }
+  }
+
+  Future<void> _onRefresh() async {
+    _loadTasks();
+    // Wait for the state to be updated to stop the refreshing indicator
+    // In a real app, you might want a more deterministic way to wait
+    await Future.delayed(const Duration(seconds: 1));
   }
 
   @override
@@ -58,63 +89,84 @@ class _TaskListPageState extends State<TaskListPage> {
             return const Center(child: CircularProgressIndicator());
           } else if (state is TasksLoaded) {
             if (state.tasks.isEmpty) {
-              return const Center(child: Text('No tasks found. Add some!'));
+              return RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: ListView(
+                  children: const [
+                    SizedBox(height: 100),
+                    Center(child: Text('No tasks found. Add some!')),
+                  ],
+                ),
+              );
             }
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.tasks.length,
-              itemBuilder: (context, index) {
-                final task = state.tasks[index];
-                return FadeInLeft(
-                  delay: Duration(milliseconds: index * 100),
-                  child: Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      title: Text(
-                        task.title,
-                        style: TextStyle(
-                          decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                          fontWeight: FontWeight.bold,
-                        ),
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: state.hasReachedMax ? state.tasks.length : state.tasks.length + 1,
+                itemBuilder: (context, index) {
+                  if (index >= state.tasks.length) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: CircularProgressIndicator(),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (task.description != null && task.description!.isNotEmpty)
-                            Text(task.description!, maxLines: 2, overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              _buildChip(task.priority, _getPriorityColor(task.priority)),
-                              const SizedBox(width: 8),
-                              _buildChip(task.category, Colors.grey),
-                            ],
+                    );
+                  }
+                  final task = state.tasks[index];
+                  return FadeInLeft(
+                    delay: Duration(milliseconds: (index % 10) * 100),
+                    child: Card(
+                      elevation: 2,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        title: Text(
+                          task.title,
+                          style: TextStyle(
+                            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
-                      ),
-                      trailing: Checkbox(
-                        value: task.isCompleted,
-                        onChanged: (val) {
-                          if (val != null) {
-                            final user = FirebaseAuth.instance.currentUser;
-                            if (user != null && task.id != null) {
-                              context.read<TaskBloc>().add(UpdateTaskEvent(
-                                    user.uid,
-                                    task.id!,
-                                    {'is_completed': val},
-                                  ));
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (task.description != null && task.description!.isNotEmpty)
+                              Text(task.description!, maxLines: 2, overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                _buildChip(task.priority, _getPriorityColor(task.priority)),
+                                const SizedBox(width: 8),
+                                _buildChip(task.category, Colors.grey),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: Checkbox(
+                          value: task.isCompleted,
+                          onChanged: (val) {
+                            if (val != null) {
+                              final user = FirebaseAuth.instance.currentUser;
+                              if (user != null && task.id != null) {
+                                context.read<TaskBloc>().add(UpdateTaskEvent(
+                                      user.uid,
+                                      task.id!,
+                                      {'is_completed': val},
+                                    ));
+                              }
                             }
-                          }
-                        },
+                          },
+                        ),
+                        onLongPress: () => _showDeleteDialog(task),
+                        onTap: () => _showTaskDetails(task),
                       ),
-                      onLongPress: () => _showDeleteDialog(task),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
           }
           return const Center(child: Text('Start adding tasks!'));
@@ -123,6 +175,30 @@ class _TaskListPageState extends State<TaskListPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTaskDialog(),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showTaskDetails(TaskEntity task) {
+    // Show a details dialog or navigate
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(task.title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Description: ${task.description ?? "N/A"}'),
+            const SizedBox(height: 8),
+            Text('Priority: ${task.priority}'),
+            Text('Category: ${task.category}'),
+            Text('Status: ${task.isCompleted ? "Completed" : "Pending"}'),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+        ],
       ),
     );
   }
