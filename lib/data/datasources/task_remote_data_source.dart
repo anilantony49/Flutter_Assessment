@@ -17,19 +17,20 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<List<TaskModel>> getTasks(String userId, {int skip = 0, int limit = 10}) async {
     try {
+      // API Doc shows collection with trailing slash: /tasks/
       final response = await dio.get(
-        ApiConstants.tasks,
+        '${ApiConstants.tasks}/',
         queryParameters: {
           'user_id': userId,
           'skip': skip,
           'limit': limit,
         },
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
         final List data = response.data['data'];
         return data.map((json) => TaskModel.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load tasks');
+        throw Exception(response.data['message'] ?? 'Failed to load tasks');
       }
     } catch (e) {
       rethrow;
@@ -39,15 +40,16 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<TaskModel> createTask(String userId, TaskModel task) async {
     try {
+      // API Doc shows collection with trailing slash: /tasks/
       final response = await dio.post(
-        ApiConstants.tasks,
+        '${ApiConstants.tasks}/',
         queryParameters: {'user_id': userId},
         data: task.toJson(),
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
         return TaskModel.fromJson(response.data['data']);
       } else {
-        throw Exception('Failed to create task');
+        throw Exception(response.data['message'] ?? 'Failed to create task');
       }
     } catch (e) {
       rethrow;
@@ -57,15 +59,16 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<TaskModel> updateTask(String userId, int taskId, Map<String, dynamic> data) async {
     try {
+      // API Doc: /tasks/{task_id}
       final response = await dio.put(
-        '${ApiConstants.tasks}$taskId',
+        '${ApiConstants.tasks}/$taskId',
         queryParameters: {'user_id': userId},
         data: data,
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
         return TaskModel.fromJson(response.data['data']);
       } else {
-        throw Exception('Failed to update task');
+        throw Exception(response.data['message'] ?? 'Failed to update task');
       }
     } catch (e) {
       rethrow;
@@ -75,12 +78,15 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   @override
   Future<void> deleteTask(String userId, int taskId) async {
     try {
+      // API Doc: /tasks/{task_id}
       final response = await dio.delete(
-        '${ApiConstants.tasks}$taskId',
+        '${ApiConstants.tasks}/$taskId',
         queryParameters: {'user_id': userId},
       );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to delete task');
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        return;
+      } else {
+        throw Exception(response.data['message'] ?? 'Failed to delete task');
       }
     } catch (e) {
       rethrow;

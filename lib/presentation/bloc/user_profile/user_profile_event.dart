@@ -8,3 +8,10 @@ class FetchUserProfileEvent extends UserProfileEvent {
 
   FetchUserProfileEvent({required this.uid});
 }
+
+class UpdateUserProfileEvent extends UserProfileEvent {
+  final String uid;
+  final String fullName;
+
+  UpdateUserProfileEvent({required this.uid, required this.fullName});
+}

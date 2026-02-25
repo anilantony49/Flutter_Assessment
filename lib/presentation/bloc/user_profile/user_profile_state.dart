@@ -18,3 +18,9 @@ class UserProfileError extends UserProfileState {
 
   UserProfileError({required this.message});
 }
+
+class UserProfileUpdateSuccess extends UserProfileState {
+  final String message;
+
+  UserProfileUpdateSuccess({required this.message});
+}
