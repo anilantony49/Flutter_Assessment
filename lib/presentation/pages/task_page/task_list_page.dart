@@ -16,17 +16,26 @@ class TaskListPage extends StatefulWidget {
 
 class _TaskListPageState extends State<TaskListPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _filterStatus = 'All'; // All, Completed, Pending
+
+  List<TaskEntity> _allTasks = [];
+  bool _hasReachedMax = false;
 
   @override
   void initState() {
     super.initState();
     _loadTasks();
     _scrollController.addListener(_onScroll);
+    _searchController.addListener(() {
+      setState(() {}); // Trigger rebuild to filter client-side
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -55,16 +64,31 @@ class _TaskListPageState extends State<TaskListPage> {
 
   Future<void> _onRefresh() async {
     _loadTasks();
-    // Wait for the state to be updated to stop the refreshing indicator
-    // In a real app, you might want a more deterministic way to wait
     await Future.delayed(const Duration(seconds: 1));
+  }
+
+  List<TaskEntity> _getFilteredTasks(List<TaskEntity> tasks) {
+    return tasks.where((task) {
+      final matchesSearch = task.title.toLowerCase().contains(_searchController.text.toLowerCase());
+      bool matchesFilter = true;
+      if (_filterStatus == 'Completed') {
+        matchesFilter = task.isCompleted;
+      } else if (_filterStatus == 'Pending') {
+        matchesFilter = !task.isCompleted;
+      }
+      return matchesSearch && matchesFilter;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tasks'),
+        title: const Text('My Tasks', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -72,107 +96,203 @@ class _TaskListPageState extends State<TaskListPage> {
           ),
         ],
       ),
-      body: BlocConsumer<TaskBloc, TaskState>(
-        listener: (context, state) {
-          if (state is TaskActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          } else if (state is TaskError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is TaskLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is TasksLoaded) {
-            if (state.tasks.isEmpty) {
-              return RefreshIndicator(
-                onRefresh: _onRefresh,
-                child: ListView(
-                  children: const [
-                    SizedBox(height: 100),
-                    Center(child: Text('No tasks found. Add some!')),
-                  ],
+      body: Column(
+        children: [
+          // Search and Filter Bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by title...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: isDark ? Colors.white10 : Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  ),
                 ),
-              );
-            }
-            return RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: state.hasReachedMax ? state.tasks.length : state.tasks.length + 1,
-                itemBuilder: (context, index) {
-                  if (index >= state.tasks.length) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: ['All', 'Pending', 'Completed'].map((status) {
+                      final isSelected = _filterStatus == status;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          selected: isSelected,
+                          label: Text(status),
+                          onSelected: (selected) {
+                            setState(() {
+                              _filterStatus = status;
+                            });
+                          },
+                          backgroundColor: isDark ? Colors.white10 : Colors.grey[200],
+                          selectedColor: theme.colorScheme.primary.withOpacity(0.2),
+                          checkmarkColor: theme.colorScheme.primary,
+                          labelStyle: TextStyle(
+                            color: isSelected ? theme.colorScheme.primary : theme.textTheme.bodyMedium?.color,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          Expanded(
+            child: BlocConsumer<TaskBloc, TaskState>(
+              listener: (context, state) {
+                if (state is TasksLoaded) {
+                  _allTasks = state.tasks;
+                  _hasReachedMax = state.hasReachedMax;
+                } else if (state is TaskActionSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message), behavior: SnackBarBehavior.floating),
+                  );
+                } else if (state is TaskError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is TaskLoading && _allTasks.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final filteredTasks = _getFilteredTasks(_allTasks);
+
+                if (filteredTasks.isEmpty) {
+                  if (_allTasks.isEmpty) {
+                    if (state is TaskLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return RefreshIndicator(
+                      onRefresh: _onRefresh,
+                      child: ListView(
+                        children: const [
+                          SizedBox(height: 100),
+                          Center(child: Text('No tasks found. Add some!')),
+                        ],
                       ),
                     );
                   }
-                  final task = state.tasks[index];
-                  return FadeInLeft(
-                    delay: Duration(milliseconds: (index % 10) * 100),
-                    child: Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        title: Text(
-                          task.title,
-                          style: TextStyle(
-                            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (task.description != null && task.description!.isNotEmpty)
-                              Text(task.description!, maxLines: 2, overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                _buildChip(task.priority, _getPriorityColor(task.priority)),
-                                const SizedBox(width: 8),
-                                _buildChip(task.category, Colors.grey),
-                              ],
-                            ),
-                          ],
-                        ),
-                        trailing: Checkbox(
-                          value: task.isCompleted,
-                          onChanged: (val) {
-                            if (val != null) {
-                              final user = FirebaseAuth.instance.currentUser;
-                              if (user != null && task.id != null) {
-                                context.read<TaskBloc>().add(UpdateTaskEvent(
-                                      user.uid,
-                                      task.id!,
-                                      {'is_completed': val},
-                                    ));
-                              }
-                            }
-                          },
-                        ),
-                        onLongPress: () => _showDeleteDialog(task),
-                        onTap: () => _showTaskDetails(task),
-                      ),
+                  
+                  return RefreshIndicator(
+                    onRefresh: _onRefresh,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 100),
+                        Center(child: Text('No matching tasks for this filter.')),
+                      ],
                     ),
                   );
-                },
-              ),
-            );
-          }
-          return const Center(child: Text('Start adding tasks!'));
-        },
+                }
+
+                return RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _hasReachedMax ? filteredTasks.length : filteredTasks.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index >= filteredTasks.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      final task = filteredTasks[index];
+                      return FadeInUp(
+                        duration: const Duration(milliseconds: 300),
+                        child: Card(
+                          elevation: 0,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: BorderSide(color: isDark ? Colors.white10 : Colors.grey[200]!),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            title: Text(
+                              task.title,
+                              style: TextStyle(
+                                decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                                fontWeight: FontWeight.bold,
+                                color: task.isCompleted ? Colors.grey : theme.textTheme.titleMedium?.color,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (task.description != null && task.description!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      task.description!,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(color: theme.textTheme.bodySmall?.color),
+                                    ),
+                                  ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    _buildChip(task.priority, _getPriorityColor(task.priority)),
+                                    const SizedBox(width: 8),
+                                    _buildChip(task.category, Colors.blueGrey),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Checkbox(
+                              value: task.isCompleted,
+                              shape: const CircleBorder(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  if (user != null && task.id != null) {
+                                    context.read<TaskBloc>().add(UpdateTaskEvent(
+                                          user.uid,
+                                          task.id!,
+                                          {'is_completed': val},
+                                        ));
+                                  }
+                                }
+                              },
+                            ),
+                            onLongPress: () => _showDeleteDialog(task),
+                            onTap: () => _showTaskDetails(task),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
+        elevation: 4,
         onPressed: () => _showAddTaskDialog(),
         child: const Icon(Icons.add),
       ),
@@ -180,40 +300,77 @@ class _TaskListPageState extends State<TaskListPage> {
   }
 
   void _showTaskDetails(TaskEntity task) {
-    // Show a details dialog or navigate
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(task.title),
-        content: Column(
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Description: ${task.description ?? "N/A"}'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    task.title,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                _buildChip(task.priority, _getPriorityColor(task.priority)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              task.description ?? 'No description provided.',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.category_outlined, size: 20, color: Colors.grey),
+                const SizedBox(width: 8),
+                Text('Category: ${task.category}'),
+              ],
+            ),
             const SizedBox(height: 8),
-            Text('Priority: ${task.priority}'),
-            Text('Category: ${task.category}'),
-            Text('Status: ${task.isCompleted ? "Completed" : "Pending"}'),
+            Row(
+              children: [
+                Icon(
+                  task.isCompleted ? Icons.check_circle_outline : Icons.radio_button_unchecked,
+                  size: 20,
+                  color: task.isCompleted ? Colors.green : Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                Text('Status: ${task.isCompleted ? "Completed" : "Pending"}'),
+              ],
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-        ],
       ),
     );
   }
 
   Widget _buildChip(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -221,11 +378,11 @@ class _TaskListPageState extends State<TaskListPage> {
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case 'High':
-        return Colors.red;
+        return Colors.redAccent;
       case 'Medium':
-        return Colors.orange;
+        return Colors.orangeAccent;
       case 'Low':
-        return Colors.green;
+        return Colors.greenAccent;
       default:
         return Colors.grey;
     }
@@ -235,11 +392,13 @@ class _TaskListPageState extends State<TaskListPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: const Text('Delete Task'),
-        content: const Text('Are you sure you want to delete this task?'),
+        content: const Text('Are you sure you want to permanentaly delete this task?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
             onPressed: () {
               final user = FirebaseAuth.instance.currentUser;
               if (user != null && task.id != null) {
@@ -247,7 +406,7 @@ class _TaskListPageState extends State<TaskListPage> {
               }
               Navigator.pop(context);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -258,38 +417,51 @@ class _TaskListPageState extends State<TaskListPage> {
     final titleController = TextEditingController();
     final descController = TextEditingController();
     String priority = 'Medium';
-    String category = 'Others';
+    String category = 'others';
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Add New Task', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+              const Text('Add New Task', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  prefixIcon: const Icon(Icons.title),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextField(
                 controller: descController,
-                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
-                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  prefixIcon: const Icon(Icons.description_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                ),
+                maxLines: 2,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: priority,
-                      decoration: const InputDecoration(labelText: 'Priority'),
+                      decoration: InputDecoration(
+                        labelText: 'Priority',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                      ),
                       items: ['Low', 'Medium', 'High'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                       onChanged: (val) => setModalState(() => priority = val!),
                     ),
@@ -298,19 +470,27 @@ class _TaskListPageState extends State<TaskListPage> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: category,
-                      decoration: const InputDecoration(labelText: 'Category'),
-                      items: ['Work', 'Personal', 'Health', 'Finance', 'Education', 'Shopping', 'Travel', 'Others']
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      decoration: InputDecoration(
+                        labelText: 'Category',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                      ),
+                      items: ['work', 'personal', 'health', 'finance', 'education', 'shopping', 'travel', 'others']
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e.toUpperCase())))
                           .toList(),
                       onChanged: (val) => setModalState(() => category = val!),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
                   onPressed: () {
                     if (titleController.text.isNotEmpty) {
                       final user = FirebaseAuth.instance.currentUser;
@@ -328,7 +508,7 @@ class _TaskListPageState extends State<TaskListPage> {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text('Add Task'),
+                  child: const Text('Create Task', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
