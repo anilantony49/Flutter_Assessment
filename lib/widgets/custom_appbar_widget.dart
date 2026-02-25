@@ -2,25 +2,35 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 
 class CustomAppbar {
-  static AppBar show(BuildContext context, enableIcon, titleText) {
+  static AppBar show(BuildContext context, bool enableIcon, String titleText) {
+    final theme = Theme.of(context);
     return AppBar(
       elevation: 0,
       centerTitle: true,
-      leading:
-          enableIcon
-              ? FadeInLeft(
-                delay: const Duration(milliseconds: 400),
-                duration: const Duration(milliseconds: 1000),
-                child: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back_ios),
+      backgroundColor: Colors.transparent,
+      leading: enableIcon
+          ? FadeInLeft(
+              duration: const Duration(milliseconds: 500),
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: theme.colorScheme.onSurface,
+                  size: 20,
                 ),
-              )
-              : const SizedBox(),
+              ),
+            )
+          : null,
       title: FadeInDown(
-        delay: const Duration(milliseconds: 400),
-        duration: const Duration(milliseconds: 1000),
-        child:   Text(titleText, style: TextStyle(fontSize: 24)),
+        duration: const Duration(milliseconds: 500),
+        child: Text(
+          titleText,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
       ),
     );
   }

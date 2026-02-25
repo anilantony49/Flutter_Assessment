@@ -60,8 +60,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              theme.colorScheme.primary.withOpacity(0.5),
-              theme.colorScheme.surface.withOpacity(0.9),
+              theme.colorScheme.primary.withOpacity(0.08),
+              theme.colorScheme.surface,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -73,10 +73,17 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               if (state is UserProfileUpdateSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.message),
+                    content: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.white),
+                        const SizedBox(width: 12),
+                        Text(state.message),
+                      ],
+                    ),
                     behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.green,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
                 );
@@ -84,11 +91,17 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               } else if (state is UserProfileError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.message),
+                    content: Row(
+                      children: [
+                        const Icon(Icons.error, color: Colors.white),
+                        const SizedBox(width: 12),
+                        Text(state.message),
+                      ],
+                    ),
                     backgroundColor: Colors.redAccent,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
                 );
@@ -105,34 +118,52 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                         duration: const Duration(milliseconds: 500),
                         child: Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: theme.colorScheme.primary
-                                  .withOpacity(0.1),
-                              child: Text(
-                                widget.currentName.isNotEmpty
-                                    ? widget.currentName[0].toUpperCase()
-                                    : 'U',
-                                style: TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      theme
-                                          .colorScheme
-                                          .primary, // Keep primary color for avatar background
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.colorScheme.primary.withOpacity(0.2),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 60,
+                                backgroundColor: theme.colorScheme.surface,
+                                child: CircleAvatar(
+                                  radius: 56,
+                                  backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                                  child: Text(
+                                    widget.currentName.isNotEmpty
+                                        ? widget.currentName[0].toUpperCase()
+                                        : 'U',
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                             Positioned(
                               bottom: 0,
                               right: 0,
-                              child: CircleAvatar(
-                                radius: 18,
-                                backgroundColor: theme.colorScheme.primary,
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  size: 18,
-                                  color: Colors.white,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: theme.colorScheme.surface, width: 3),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: theme.colorScheme.primary,
+                                  child: const Icon(
+                                    Icons.camera_alt_rounded,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -189,44 +220,31 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                         child: SizedBox(
                           width: double.infinity,
                           height: 55,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary,
-                              foregroundColor: theme.colorScheme.onPrimary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              elevation: 5,
-                              shadowColor: theme.colorScheme.primary
-                                  .withOpacity(0.3),
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              disabledBackgroundColor:
+                                  theme.colorScheme.primary,
+                              disabledForegroundColor:
+                                  theme.colorScheme.onPrimary,
                             ),
-                            onPressed:
-                                state is UserProfileUpdating
-                                    ? null
-                                    : () {
-                                      if (_formKey.currentState!.validate()) {
-                                        context.read<UserProfileBloc>().add(
-                                          UpdateUserProfileEvent(
-                                            uid: widget.uid,
-                                            fullName:
-                                                _nameController.text.trim(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                            child:
-                                state is UserProfileUpdating
-                                    ? CupertinoActivityIndicator(
-                                      color: theme.colorScheme.onPrimary,
-                                    )
-                                    : Text(
-                                      'Update Profile',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.colorScheme.onPrimary,
-                                      ),
-                                    ),
+                            onPressed: state is UserProfileUpdating
+                                ? null
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      context.read<UserProfileBloc>().add(
+                                            UpdateUserProfileEvent(
+                                              uid: widget.uid,
+                                              fullName:
+                                                  _nameController.text.trim(),
+                                            ),
+                                          );
+                                    }
+                                  },
+                            child: state is UserProfileUpdating
+                                ? CupertinoActivityIndicator(
+                                    color: theme.colorScheme.onPrimary,
+                                  )
+                                : const Text('Update Profile'),
                           ),
                         ),
                       ),

@@ -77,41 +77,51 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
       builder: (context, state) {
         final isLoading = state is UserRegistrationLoadingState;
         return FadeInDown(
-          delay: const Duration(milliseconds: 400),
-          duration: const Duration(milliseconds: 1000),
-          child: Form(
-            key: formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
+          delay: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 800),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Form(
+              key: formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Create an account',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontVariations: fontWeightW700,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Create an account',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                      kHeight(10),
-                      const Text(
-                        "Please enter you information and create your account.",
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          "Join us and start managing your tasks efficiently.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  kHeight(25),
+
+                  const SizedBox(height: 32),
+
                   // Full name field
                   CustomTxtFormField(
                     hintText: 'Full name',
                     controller: fullnameController,
                     validator: AppValidators.validateFullName,
                   ),
-                  kHeight(20),
+
+                  const SizedBox(height: 16),
 
                   // Email address field
                   CustomTxtFormField(
@@ -119,7 +129,8 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                     controller: emailController,
                     validator: AppValidators.validateEmail,
                   ),
-                  kHeight(20),
+
+                  const SizedBox(height: 16),
 
                   // Password field
                   BlocBuilder<PasswordVisibilityBloc, PasswordVisibilityState>(
@@ -129,24 +140,24 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                         controller: passwordController,
                         validator: AppValidators.validatePassword,
                         obscureText: signUpState.isPasswordHidden,
-                        suffix: GestureDetector(
-                          onTap: () {
+                        suffix: IconButton(
+                          onPressed: () {
                             context.read<PasswordVisibilityBloc>().add(
                               TogglePasswordVisibilityEvent(),
                             );
                           },
-                          child: Icon(
+                          icon: Icon(
                             signUpState.isPasswordHidden
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
                             size: 20,
-                            color: Theme.of(context).colorScheme.secondary,
                           ),
                         ),
                       );
                     },
                   ),
-                  kHeight(20),
+
+                  const SizedBox(height: 16),
 
                   // Confirm password field
                   BlocBuilder<PasswordVisibilityBloc, PasswordVisibilityState>(
@@ -161,24 +172,24 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                           return AppValidators.validatePassword(val);
                         },
                         obscureText: signUpState.isConfirmPasswordHidden,
-                        suffix: GestureDetector(
-                          onTap: () {
+                        suffix: IconButton(
+                          onPressed: () {
                             context.read<PasswordVisibilityBloc>().add(
                               ToggleConfirmPasswordVisibilityEvent(),
                             );
                           },
-                          child: Icon(
+                          icon: Icon(
                             signUpState.isConfirmPasswordHidden
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
                             size: 20,
-                            color: Theme.of(context).colorScheme.secondary,
                           ),
                         ),
                       );
                     },
                   ),
-                  kHeight(25),
+
+                  const SizedBox(height: 32),
 
                   // Register button
                   CustomButton(

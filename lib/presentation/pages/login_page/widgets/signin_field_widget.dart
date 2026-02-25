@@ -69,13 +69,12 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
             state is SignInBaseState ? state.isPasswordHidden : true;
 
         return FadeInDown(
-          delay: const Duration(milliseconds: 400),
-          duration: const Duration(milliseconds: 1000),
+          delay: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 800),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(40, 40, 40, 30),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Form(
               key: formKey,
-              // autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -84,23 +83,27 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Welcome back!',
                           style: TextStyle(
-                            fontSize: 20,
-                            fontVariations: fontWeightW700,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                        kHeight(10),
-                        const Text(
-                          "Enter your login details to continue.",
-                          style: TextStyle(fontSize: 15),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Enter your details to continue your journey.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          ),
                         ),
                       ],
                     ),
                   ),
 
-                  kHeight(25),
+                  const SizedBox(height: 32),
 
                   // Email address field
                   CustomTxtFormField(
@@ -109,56 +112,51 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                     validator: AppValidators.validateEmail,
                   ),
 
-                  kHeight(20),
+                  const SizedBox(height: 20),
 
                   /// Password
                   CustomTxtFormField(
                     controller: passwordController,
                     hintText: 'Password',
                     obscureText: isPasswordHidden,
-                    suffix: GestureDetector(
-                      onTap: () {
+                    suffix: IconButton(
+                      onPressed: () {
                         context.read<SignInBloc>().add(
                           ToggleSignInPasswordVisibilityEvent(),
                         );
                       },
-                      child: Icon(
+                      icon: Icon(
                         isPasswordHidden
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
                         size: 20,
-                        color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
                     validator: AppValidators.validatePassword,
                   ),
 
-                  kHeight(25),
+                  const SizedBox(height: 12),
+
+                  /// Forgot Password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
 
                   /// Sign In Button
                   CustomButton(
                     buttonText: 'Login',
                     isLoading: isLoading,
                     onPressed: isLoading ? null : () => _loginUser(context),
-                  ),
-
-                  kHeight(10),
-
-                  /// Forgot Password (Link only – no functionality)
-                  InkWell(
-                    onTap: () {
-                      // No functionality required
-                    },
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Forget Password?',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),

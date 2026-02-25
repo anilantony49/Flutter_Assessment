@@ -44,4 +44,14 @@ class AppValidators {
     }
     return null;
   }
+
+  static String? validateOnlyLetters(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+    if (RegExp(r'[0-9]').hasMatch(value)) {
+      return 'Numbers are not allowed';
+    }
+    return null;
+  }
 }

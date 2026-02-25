@@ -112,7 +112,8 @@ class _HomePageState extends State<HomePage> {
             } else if (state is UserProfileLoaded) {
               final user = state.user;
 
-              return Padding(
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,45 +197,43 @@ class _HomePageState extends State<HomePage> {
 
                     const SizedBox(height: 16),
 
-                    Expanded(
-                      child: GridView.count(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        children: [
-                          ActionCard(
-                            icon: Icons.task_outlined,
-                            label: 'My Tasks',
-                            color: Colors.deepPurpleAccent,
-                            onTap:
-                                () => nextScreen(context, const TaskListPage()),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      children: [
+                        ActionCard(
+                          icon: Icons.task_outlined,
+                          label: 'My Tasks',
+                          color: Colors.deepPurpleAccent,
+                          onTap: () => nextScreen(context, const TaskListPage()),
+                        ),
+                        ActionCard(
+                          icon: Icons.person_outline,
+                          label: 'Edit Profile',
+                          color: Colors.blueAccent,
+                          onTap: () => nextScreen(
+                            context,
+                            ProfileEditPage(
+                              uid: user.uid,
+                              currentName: user.fullName,
+                              currentEmail: user.email,
+                            ),
                           ),
-                          ActionCard(
-                            icon: Icons.person_outline,
-                            label: 'Edit Profile',
-                            color: Colors.blueAccent,
-                            onTap:
-                                () => nextScreen(
-                                  context,
-                                  ProfileEditPage(
-                                    uid: user.uid,
-                                    currentName: user.fullName,
-                                    currentEmail: user.email,
-                                  ),
-                                ),
-                          ),
-                          const ActionCard(
-                            icon: Icons.settings_outlined,
-                            label: 'Settings',
-                            color: Colors.lightGreen,
-                          ),
-                          const ActionCard(
-                            icon: Icons.help_outline,
-                            label: 'Help & Support',
-                            color: Colors.purpleAccent,
-                          ),
-                        ],
-                      ),
+                        ),
+                        const ActionCard(
+                          icon: Icons.settings_outlined,
+                          label: 'Settings',
+                          color: Colors.lightGreen,
+                        ),
+                        const ActionCard(
+                          icon: Icons.help_outline,
+                          label: 'Help & Support',
+                          color: Colors.purpleAccent,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -256,21 +255,32 @@ Future<void> _showLogoutConfirmation(BuildContext context) async {
     builder: (context) {
       return AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
         contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        title: Text(
-          'Confirm Logout',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('Confirm Logout'),
+          ],
         ),
         content: Text(
-          'Are you sure you want to log out?\nYou will need to sign in again.',
+          'Are you sure you want to log out?\nYou will need to sign in again to access your tasks.',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
         actions: [
@@ -278,16 +288,8 @@ Future<void> _showLogoutConfirmation(BuildContext context) async {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
             child: const Text('Logout'),
           ),
         ],

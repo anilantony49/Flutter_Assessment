@@ -20,35 +20,32 @@ class CustomButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      child: MaterialButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        color: theme.colorScheme.primary,
-        onPressed: isLoading ? () {} : onPressed,
-        child: FadeInUp(
-          delay: const Duration(milliseconds: 400),
-          duration: const Duration(milliseconds: 1000),
-          child:
-              isLoading
-                  ? SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: Center(
-                      child: CupertinoActivityIndicator(
-                        radius: 10,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  )
-                  : Text(
-                    buttonText,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+      child: FilledButton(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          // Maintain primary color even when disabled (loading)
+          disabledBackgroundColor: theme.colorScheme.primary,
+          disabledForegroundColor: theme.colorScheme.onPrimary,
         ),
+        onPressed: isLoading ? null : onPressed,
+        child: isLoading
+            ? SizedBox(
+                height: 22,
+                width: 22,
+                child: Center(
+                  child: CupertinoActivityIndicator(
+                    radius: 10,
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              )
+            : Text(
+                buttonText,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_assesment/utils/constants.dart';
- 
+
 var mainFont = 'Coco-Gothic-Pro-Alt';
 
 void mySystemTheme(BuildContext context) {
@@ -9,10 +9,12 @@ void mySystemTheme(BuildContext context) {
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
+      statusBarIconBrightness:
+          brightness == Brightness.light ? Brightness.dark : Brightness.light,
       statusBarBrightness: brightness,
       systemNavigationBarColor: Theme.of(context).colorScheme.surface,
-      systemNavigationBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
+      systemNavigationBarIconBrightness:
+          brightness == Brightness.light ? Brightness.dark : Brightness.light,
     ),
   );
 }
@@ -26,16 +28,18 @@ void changeSystemThemeOnPopup({
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: statusColor ?? Colors.transparent,
-      statusBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
+      statusBarIconBrightness:
+          brightness == Brightness.light ? Brightness.dark : Brightness.light,
       statusBarBrightness: brightness,
       systemNavigationBarColor: color ?? Theme.of(context).colorScheme.surface,
-      systemNavigationBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
+      systemNavigationBarIconBrightness:
+          brightness == Brightness.light ? Brightness.dark : Brightness.light,
     ),
   );
 }
 
 var lightTheme = ThemeData(
-  useMaterial3: false,
+  useMaterial3: true,
   fontFamily: mainFont,
   unselectedWidgetColor: lGray,
   splashColor: Colors.transparent,
@@ -43,22 +47,48 @@ var lightTheme = ThemeData(
   splashFactory: NoSplash.splashFactory,
   colorScheme: const ColorScheme(
     brightness: Brightness.light,
-    primary: lBlue, // Use Blue as primary brand color
+    primary: lBlue,
     onPrimary: lWhite,
     primaryContainer: lWhite,
     onPrimaryContainer: lBlack,
     secondary: lGray,
-    onSecondary: lLightGrey,
-    outline: lLightGrey2,
-    outlineVariant: lLightGrey3,
-    surface: lLightWhite,
-    onSurface: lBlack, // Explicitly black on white surface
-    tertiary: lDialog,
-    onTertiary: lDialog2,
-    surfaceTint: lPDialog2,
-    scrim: lLightGrey,
+    onSecondary: lWhite,
+    secondaryContainer: lLightGrey4,
+    onSecondaryContainer: lBlack,
+    surface: lWhite,
+    onSurface: lBlack,
+    surfaceContainer: lWhite,
+    surfaceTint: Colors.transparent,
     error: Colors.red,
     onError: lWhite,
+  ),
+  scaffoldBackgroundColor: lLightWhite,
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: lBlue,
+      foregroundColor: lWhite,
+      disabledBackgroundColor: lBlue,
+      disabledForegroundColor: lWhite,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    ),
+  ),
+  filledButtonTheme: FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      backgroundColor: lBlue,
+      foregroundColor: lWhite,
+      disabledBackgroundColor: lBlue,
+      disabledForegroundColor: lWhite,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: lBlue,
+      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+    ),
   ),
   listTileTheme: const ListTileThemeData(iconColor: lBlack, textColor: lBlack),
   bottomAppBarTheme: const BottomAppBarTheme(color: lLightWhite),
@@ -95,7 +125,7 @@ var lightTheme = ThemeData(
 );
 
 var darkTheme = ThemeData(
-  useMaterial3: false,
+  useMaterial3: true,
   fontFamily: mainFont,
   unselectedWidgetColor: lGray,
   splashColor: Colors.transparent,
@@ -103,22 +133,47 @@ var darkTheme = ThemeData(
   splashFactory: NoSplash.splashFactory,
   colorScheme: const ColorScheme(
     brightness: Brightness.dark,
-    primary: lBlue, // Brand color consistent with light theme
+    primary: lBlue,
     onPrimary: lWhite,
     primaryContainer: Color(0xFF1E1E1E),
     onPrimaryContainer: lWhite,
     secondary: lGray,
-    onSecondary: Color(0xFF333333),
-    outline: Color(0xFF444444),
-    outlineVariant: Color(0xFF555555),
+    onSecondary: lWhite,
+    secondaryContainer: Color(0xFF2C2C2C),
+    onSecondaryContainer: lWhite,
     surface: Color(0xFF121212),
-    onSurface: lWhite, // White text on dark background
-    tertiary: lDialog,
-    onTertiary: lDialog2,
-    surfaceTint: lPDialog2,
-    scrim: lLightGrey,
+    onSurface: lWhite,
+    surfaceContainer: Color(0xFF1E1E1E),
+    surfaceTint: Colors.transparent,
     error: Colors.redAccent,
     onError: lWhite,
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: lBlue,
+      foregroundColor: lWhite,
+      disabledBackgroundColor: lBlue,
+      disabledForegroundColor: lWhite,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    ),
+  ),
+  filledButtonTheme: FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      backgroundColor: lBlue,
+      foregroundColor: lWhite,
+      disabledBackgroundColor: lBlue,
+      disabledForegroundColor: lWhite,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    ),
+  ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: lWhite,
+      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+    ),
   ),
   listTileTheme: const ListTileThemeData(iconColor: lWhite, textColor: lWhite),
   bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xFF1E1E1E)),

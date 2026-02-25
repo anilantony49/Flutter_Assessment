@@ -4,31 +4,34 @@ import 'package:flutter_assesment/presentation/pages/registration_page/registrat
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 
 class SignInWidgets {
-  static InkWell signUpNavigate(BuildContext context) {
-    return InkWell(
-      onTap: () => nextScreen(context, const RegistrationPage()),
-      child: FadeInUp(
-        delay: const Duration(milliseconds: 700),
-        duration: const Duration(milliseconds: 1000),
+  static Widget signUpNavigate(BuildContext context) {
+    return FadeInUp(
+      duration: const Duration(milliseconds: 500),
+      child: TextButton(
+        onPressed: () => nextScreen(context, const RegistrationPage()),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        ),
         child: Text.rich(
-          textAlign: TextAlign.center,
           TextSpan(
             children: [
               TextSpan(
                 text: "Don't have an account? ",
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               TextSpan(
-                text: 'Register.',
+                text: 'Register',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
-                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );

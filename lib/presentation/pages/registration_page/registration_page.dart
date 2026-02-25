@@ -19,18 +19,14 @@ class RegistrationPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Container(
           constraints: BoxConstraints(minHeight: mediaHeight),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 40, 0, 30),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const SignUpFieldWidget(),
-                Positioned(
-                  bottom: 0,
-                  child: SignUpWidgets.signInNavigate(context),
-                ),
-              ],
-            ),
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox.shrink(), // Spacer for alignment
+              const SignUpFieldWidget(),
+              SignUpWidgets.signInNavigate(context),
+            ],
           ),
         ),
       ),
