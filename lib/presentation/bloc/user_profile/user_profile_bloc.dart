@@ -11,6 +11,26 @@ part 'user_profile_state.dart';
 class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   UserProfileBloc() : super(UserProfileInitial()) {
     on<FetchUserProfileEvent>(_onFetchUserProfile);
+    on<UpdateUserProfileEvent>(_onUpdateUserProfile);
+  }
+
+  FutureOr<void> _onUpdateUserProfile(
+    UpdateUserProfileEvent event,
+    Emitter<UserProfileState> emit,
+  ) async {
+    emit(UserProfileLoading());
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(event.uid)
+          .update({'fullName': event.fullName});
+
+      // Emit success state, then fetch profile again to update the UI
+      emit(UserProfileUpdateSuccess(message: 'Profile updated successfully!'));
+      add(FetchUserProfileEvent(uid: event.uid));
+    } catch (e) {
+      emit(UserProfileError(message: 'Failed to update user profile: $e'));
+    }
   }
 
   FutureOr<void> _onFetchUserProfile(

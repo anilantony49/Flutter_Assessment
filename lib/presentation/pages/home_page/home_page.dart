@@ -4,6 +4,7 @@ import 'package:flutter_assesment/presentation/bloc/theme/theme_bloc.dart';
 import 'package:flutter_assesment/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/widgets/action_card_widget.dart';
 import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
+import 'package:flutter_assesment/presentation/pages/profile_page/profile_edit_page.dart';
 import 'package:flutter_assesment/presentation/pages/task_page/task_list_page.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -210,10 +211,19 @@ class _HomePageState extends State<HomePage> {
                                   () =>
                                       nextScreen(context, const TaskListPage()),
                             ),
-                            const ActionCard(
+                            ActionCard(
                               icon: Icons.person_outline,
                               label: 'Edit Profile',
                               color: Colors.blueAccent,
+                              onTap:
+                                  () => nextScreen(
+                                    context,
+                                    ProfileEditPage(
+                                      uid: user.uid,
+                                      currentName: user.fullName,
+                                      currentEmail: user.email,
+                                    ),
+                                  ),
                             ),
                             const ActionCard(
                               icon: Icons.settings_outlined,
