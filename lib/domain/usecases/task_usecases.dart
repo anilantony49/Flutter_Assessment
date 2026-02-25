@@ -7,7 +7,11 @@ class GetTasksUseCase {
   final TaskRepository repository;
   GetTasksUseCase(this.repository);
 
-  Future<Either<Failure, List<TaskEntity>>> call(String userId, {int skip = 0, int limit = 10}) {
+  Future<Either<Failure, List<TaskEntity>>> call(
+    String userId, {
+    int skip = 0,
+    int limit = 10,
+  }) {
     return repository.getTasks(userId, skip: skip, limit: limit);
   }
 }
@@ -25,7 +29,11 @@ class UpdateTaskUseCase {
   final TaskRepository repository;
   UpdateTaskUseCase(this.repository);
 
-  Future<Either<Failure, TaskEntity>> call(String userId, int taskId, Map<String, dynamic> data) {
+  Future<Either<Failure, TaskEntity>> call(
+    String userId,
+    int taskId,
+    Map<String, dynamic> data,
+  ) {
     return repository.updateTask(userId, taskId, data);
   }
 }

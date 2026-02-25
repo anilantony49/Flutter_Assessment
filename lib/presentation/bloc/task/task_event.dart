@@ -55,3 +55,24 @@ class SyncTasksEvent extends TaskEvent {
   @override
   List<Object?> get props => [userId];
 }
+
+class SearchTasksEvent extends TaskEvent {
+  final String query;
+  SearchTasksEvent(this.query);
+  @override
+  List<Object?> get props => [query];
+}
+
+class FilterTasksEvent extends TaskEvent {
+  final String status;
+  FilterTasksEvent(this.status);
+  @override
+  List<Object?> get props => [status];
+}
+
+class SortTasksEvent extends TaskEvent {
+  final String sortBy;
+  SortTasksEvent(this.sortBy);
+  @override
+  List<Object?> get props => [sortBy];
+}

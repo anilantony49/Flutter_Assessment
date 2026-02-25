@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/firebase_options.dart';
+import 'package:flutter_assesment/presentation/pages/home_page/home_page.dart';
 import 'package:flutter_assesment/presentation/pages/login_page/login_page.dart';
 import 'package:flutter_assesment/presentation/bloc/registration/registration_bloc.dart';
 import 'package:flutter_assesment/presentation/bloc/theme/theme_bloc.dart';
@@ -42,7 +44,9 @@ class MyApp extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeState.themeMode,
-            home: const LoginPage(),
+            home: FirebaseAuth.instance.currentUser != null
+                ? const HomePage()
+                : const LoginPage(),
           );
         },
       ),

@@ -1,3 +1,4 @@
+import 'package:flutter_assesment/domain/entities/task_entity.dart';
 import 'package:flutter_assesment/domain/usecases/task_usecases.dart';
 import 'package:flutter_assesment/presentation/bloc/task/task_event.dart';
 import 'package:flutter_assesment/presentation/bloc/task/task_state.dart';
@@ -31,7 +32,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       );
       result.fold((failure) => emit(TaskError(failure.message)), (tasks) {
         _currentSkip = tasks.length;
-        emit(TasksLoaded(tasks: tasks, hasReachedMax: tasks.length < _limit));
+        final filtered = _applyFilter(tasks, 'All', 'Created Date', '');
+        emit(
+          TasksLoaded(
+            tasks: tasks,
+            filteredTasks: filtered,
+            hasReachedMax: tasks.length < _limit,
+          ),
+        );
       });
     });
 
@@ -59,11 +67,22 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
               );
             } else {
               _currentSkip += newTasks.length;
+              final allTasks = currentState.tasks + newTasks;
+              final filtered = _applyFilter(
+                allTasks,
+                currentState.filterStatus,
+                currentState.sortBy,
+                currentState.searchQuery,
+              );
               emit(
                 TasksLoaded(
-                  tasks: currentState.tasks + newTasks,
+                  tasks: allTasks,
+                  filteredTasks: filtered,
                   hasReachedMax: newTasks.length < _limit,
                   isLoadingMore: false,
+                  filterStatus: currentState.filterStatus,
+                  sortBy: currentState.sortBy,
+                  searchQuery: currentState.searchQuery,
                 ),
               );
             }
@@ -105,5 +124,88 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       await syncTasksUseCase(event.userId);
       add(LoadTasksEvent(event.userId)); // Refresh list after sync
     });
+
+    on<SearchTasksEvent>((event, emit) {
+      if (state is TasksLoaded) {
+        final s = state as TasksLoaded;
+        final filtered = _applyFilter(
+          s.tasks,
+          s.filterStatus,
+          s.sortBy,
+          event.query,
+        );
+        emit(s.copyWith(filteredTasks: filtered, searchQuery: event.query));
+      }
+    });
+
+    on<FilterTasksEvent>((event, emit) {
+      if (state is TasksLoaded) {
+        final s = state as TasksLoaded;
+        final filtered = _applyFilter(
+          s.tasks,
+          event.status,
+          s.sortBy,
+          s.searchQuery,
+        );
+        emit(s.copyWith(filteredTasks: filtered, filterStatus: event.status));
+      }
+    });
+
+    on<SortTasksEvent>((event, emit) {
+      if (state is TasksLoaded) {
+        final s = state as TasksLoaded;
+        final filtered = _applyFilter(
+          s.tasks,
+          s.filterStatus,
+          event.sortBy,
+          s.searchQuery,
+        );
+        emit(s.copyWith(filteredTasks: filtered, sortBy: event.sortBy));
+      }
+    });
+  }
+
+  List<TaskEntity> _applyFilter(
+    List<TaskEntity> tasks,
+    String status,
+    String sortBy,
+    String query,
+  ) {
+    var filtered =
+        tasks.where((task) {
+          final matchesSearch = task.title.toLowerCase().contains(
+            query.toLowerCase(),
+          );
+          bool matchesFilter = true;
+          if (status == 'Completed') {
+            matchesFilter = task.isCompleted;
+          } else if (status == 'Pending') {
+            matchesFilter = !task.isCompleted;
+          }
+          return matchesSearch && matchesFilter;
+        }).toList();
+
+    if (sortBy == 'Created Date') {
+      filtered.sort((a, b) {
+        final dateA = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateB.compareTo(dateA);
+      });
+    } else if (sortBy == 'Due Date') {
+      filtered.sort((a, b) {
+        if (a.dueDate == null && b.dueDate == null) return 0;
+        if (a.dueDate == null) return 1;
+        if (b.dueDate == null) return -1;
+        return a.dueDate!.compareTo(b.dueDate!);
+      });
+    } else if (sortBy == 'Priority') {
+      final weights = {'High': 3, 'Medium': 2, 'Low': 1};
+      filtered.sort((a, b) {
+        final weightA = weights[a.priority] ?? 0;
+        final weightB = weights[b.priority] ?? 0;
+        return weightB.compareTo(weightA);
+      });
+    }
+    return filtered;
   }
 }

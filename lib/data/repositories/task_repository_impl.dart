@@ -19,6 +19,7 @@ class TaskRepositoryImpl implements TaskRepository {
     required this.networkInfo,
   });
 
+  @override
   Future<void> syncPendingActions(String userId) async {
     if (!await networkInfo.isConnected) return;
 
