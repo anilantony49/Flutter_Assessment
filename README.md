@@ -1,16 +1,48 @@
-# flutter_assesment
+# 📌 Flutter Task Manager
 
-A new Flutter project.
+A scalable Flutter Task Management Application built using modern architecture principles and best practices. The app integrates Firebase Authentication, Cloud Firestore, and a RESTful API with a robust offline-first caching strategy for seamless performance.
 
-## Getting Started
+## 🔑 Key Highlights
 
-This project is a starting point for a Flutter application.
+### 🔐 Secure Authentication
+Email & Password login with persistent sessions, validation, and user-friendly error handling.
 
-A few resources to get you started if this is your first Flutter project:
+###👤 User Profile Management
+Profile data stored in Firestore (users/{userId}) with theme preference (Dark/Light mode) auto-applied on launch.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 📋 Task Management Module
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+REST API integration with pagination (skip & limit)
+
+Infinite scroll & pull-to-refresh
+
+Search, filter (All / Completed / Pending)
+
+Sort by Due Date, Priority, Created Date
+
+Add / Update / Delete with optimistic UI
+
+### 📡 Offline-First Architecture
+Local caching using Hive/SQLite, automatic sync when online, and offline banner indicator.
+
+### 🧠 State Management
+Implemented using Riverpod / Bloc
+Clean separation of concerns (No business logic in UI)
+Proper loading and structured error states
+
+### ⚠️ Structured Error Modeling
+AppException, NetworkException, ServerException, CacheException, AuthException
+
+### 🎨 UI & Experience
+
+Material 3 design system
+
+Responsive layout with proper spacing
+
+Clean, modern UX
+
+Empty state handling
+
+No overflow issues
+
+ 
