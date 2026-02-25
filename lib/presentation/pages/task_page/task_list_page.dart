@@ -22,6 +22,7 @@ class _TaskListPageState extends State<TaskListPage> {
 
   List<TaskEntity> _allTasks = [];
   bool _hasReachedMax = false;
+  String _sortBy = 'Created Date'; // Created Date, Due Date, Priority
 
   @override
   void initState() {
@@ -69,18 +70,81 @@ class _TaskListPageState extends State<TaskListPage> {
   }
 
   List<TaskEntity> _getFilteredTasks(List<TaskEntity> tasks) {
-    return tasks.where((task) {
-      final matchesSearch = task.title.toLowerCase().contains(
-        _searchController.text.toLowerCase(),
-      );
-      bool matchesFilter = true;
-      if (_filterStatus == 'Completed') {
-        matchesFilter = task.isCompleted;
-      } else if (_filterStatus == 'Pending') {
-        matchesFilter = !task.isCompleted;
-      }
-      return matchesSearch && matchesFilter;
-    }).toList();
+    final filtered =
+        tasks.where((task) {
+          final matchesSearch = task.title.toLowerCase().contains(
+            _searchController.text.toLowerCase(),
+          );
+          bool matchesFilter = true;
+          if (_filterStatus == 'Completed') {
+            matchesFilter = task.isCompleted;
+          } else if (_filterStatus == 'Pending') {
+            matchesFilter = !task.isCompleted;
+          }
+          return matchesSearch && matchesFilter;
+        }).toList();
+
+    // Sorting logic
+    if (_sortBy == 'Created Date') {
+      filtered.sort((a, b) {
+        final dateA = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final dateB = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return dateB.compareTo(dateA); // Newest first
+      });
+    } else if (_sortBy == 'Due Date') {
+      filtered.sort((a, b) {
+        if (a.dueDate == null && b.dueDate == null) return 0;
+        if (a.dueDate == null) return 1;
+        if (b.dueDate == null) return -1;
+        return a.dueDate!.compareTo(b.dueDate!); // Earliest first
+      });
+    } else if (_sortBy == 'Priority') {
+      final weights = {'High': 3, 'Medium': 2, 'Low': 1};
+      filtered.sort((a, b) {
+        final weightA = weights[a.priority] ?? 0;
+        final weightB = weights[b.priority] ?? 0;
+        return weightB.compareTo(weightA); // Highest first
+      });
+    }
+
+    return filtered;
+  }
+
+  void _showSortBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  ['Created Date', 'Due Date', 'Priority'].map((option) {
+                    return ListTile(
+                      leading: Icon(
+                        _sortBy == option
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        color:
+                            _sortBy == option
+                                ? Theme.of(context).primaryColor
+                                : null,
+                      ),
+                      title: Text(option),
+                      onTap: () {
+                        setState(() {
+                          _sortBy = option;
+                        });
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
+    );
   }
 
   @override
@@ -124,40 +188,52 @@ class _TaskListPageState extends State<TaskListPage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children:
-                        ['All', 'Pending', 'Completed'].map((status) {
-                          final isSelected = _filterStatus == status;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: FilterChip(
-                              selected: isSelected,
-                              label: Text(status),
-                              onSelected: (selected) {
-                                setState(() {
-                                  _filterStatus = status;
-                                });
-                              },
-                              backgroundColor:
-                                  isDark ? Colors.white10 : Colors.grey[200],
-                              selectedColor: theme.colorScheme.primary
-                                  .withOpacity(0.2),
-                              checkmarkColor: theme.colorScheme.primary,
-                              labelStyle: TextStyle(
-                                color:
-                                    isSelected
-                                        ? theme.colorScheme.primary
-                                        : theme.textTheme.bodyMedium?.color,
-                                fontWeight:
-                                    isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                    children: [
+                      ...['All', 'Pending', 'Completed'].map((status) {
+                        final isSelected = _filterStatus == status;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            selected: isSelected,
+                            label: Text(status),
+                            onSelected: (selected) {
+                              setState(() {
+                                _filterStatus = status;
+                              });
+                            },
+                            backgroundColor:
+                                isDark ? Colors.white10 : Colors.grey[200],
+                            selectedColor: theme.colorScheme.primary
+                                .withOpacity(0.2),
+                            checkmarkColor: theme.colorScheme.primary,
+                            labelStyle: TextStyle(
+                              color:
+                                  isSelected
+                                      ? theme.colorScheme.primary
+                                      : theme.textTheme.bodyMedium?.color,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                             ),
-                          );
-                        }).toList(),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        );
+                      }),
+                      const SizedBox(width: 8),
+                      ActionChip(
+                        avatar: const Icon(Icons.sort, size: 16),
+                        label: Text(_sortBy),
+                        onPressed: _showSortBottomSheet,
+                        backgroundColor:
+                            isDark ? Colors.white10 : Colors.grey[200],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -399,6 +475,20 @@ class _TaskListPageState extends State<TaskListPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Due Date: ${task.dueDate != null ? DateFormat('MMM d, yyyy').format(task.dueDate!) : "No Due Date"}',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
                     Icon(
                       task.isCompleted
                           ? Icons.check_circle_outline
@@ -445,6 +535,7 @@ class _TaskListPageState extends State<TaskListPage> {
     final descController = TextEditingController(text: task.description);
     String priority = task.priority;
     String category = task.category;
+    DateTime? dueDate = task.dueDate;
 
     showModalBottomSheet(
       context: context,
@@ -561,6 +652,34 @@ class _TaskListPageState extends State<TaskListPage> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.calendar_today),
+                        title: Text(
+                          dueDate == null
+                              ? 'No Due Date Selected'
+                              : 'Due Date: ${DateFormat('MMM d, yyyy').format(dueDate!)}',
+                        ),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: dueDate ?? DateTime.now(),
+                              firstDate: DateTime.now().subtract(
+                                const Duration(days: 365),
+                              ),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365 * 2),
+                              ),
+                            );
+                            if (picked != null) {
+                              setModalState(() => dueDate = picked);
+                            }
+                          },
+                          child: Text(dueDate == null ? 'Set' : 'Change'),
+                        ),
+                      ),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -581,6 +700,7 @@ class _TaskListPageState extends State<TaskListPage> {
                                     'description': descController.text,
                                     'priority': priority,
                                     'category': category,
+                                    'due_date': dueDate?.toIso8601String(),
                                   }),
                                 );
                               }
@@ -678,6 +798,7 @@ class _TaskListPageState extends State<TaskListPage> {
     final descController = TextEditingController();
     String priority = 'Medium';
     String category = 'Others';
+    DateTime? dueDate;
 
     showModalBottomSheet(
       context: context,
@@ -795,6 +916,32 @@ class _TaskListPageState extends State<TaskListPage> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.calendar_today),
+                        title: Text(
+                          dueDate == null
+                              ? 'No Due Date Selected'
+                              : 'Due Date: ${DateFormat('MMM d, yyyy').format(dueDate!)}',
+                        ),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365 * 2),
+                              ),
+                            );
+                            if (picked != null) {
+                              setModalState(() => dueDate = picked);
+                            }
+                          },
+                          child: Text(dueDate == null ? 'Set' : 'Change'),
+                        ),
+                      ),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -819,9 +966,7 @@ class _TaskListPageState extends State<TaskListPage> {
                                       category: category,
                                       isCompleted: false,
                                       createdAt: DateTime.now(),
-                                      dueDate: null,
-
-                                      // updatedAt: DateTime.now(),
+                                      dueDate: dueDate,
                                     ),
                                   ),
                                 );
