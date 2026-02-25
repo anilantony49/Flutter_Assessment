@@ -3,7 +3,7 @@ import 'package:flutter_assesment/core/network/api_constants.dart';
 import 'package:flutter_assesment/data/models/task_model.dart';
 
 abstract class TaskRemoteDataSource {
-  Future<List<TaskModel>> getTasks(String userId);
+  Future<List<TaskModel>> getTasks(String userId, {int skip, int limit});
   Future<TaskModel> createTask(String userId, TaskModel task);
   Future<TaskModel> updateTask(String userId, int taskId, Map<String, dynamic> data);
   Future<void> deleteTask(String userId, int taskId);
@@ -15,11 +15,15 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   TaskRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<TaskModel>> getTasks(String userId) async {
+  Future<List<TaskModel>> getTasks(String userId, {int skip = 0, int limit = 10}) async {
     try {
       final response = await dio.get(
         ApiConstants.tasks,
-        queryParameters: {'user_id': userId},
+        queryParameters: {
+          'user_id': userId,
+          'skip': skip,
+          'limit': limit,
+        },
       );
       if (response.statusCode == 200) {
         final List data = response.data['data'];

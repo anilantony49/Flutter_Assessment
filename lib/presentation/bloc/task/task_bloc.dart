@@ -17,7 +17,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   }) : super(TaskInitial()) {
     on<LoadTasksEvent>((event, emit) async {
       emit(TaskLoading());
-      final result = await getTasksUseCase(event.userId);
+      final result = await getTasksUseCase(event.userId, skip: event.skip, limit: event.limit);
       result.fold(
         (failure) => emit(TaskError(failure.message)),
         (tasks) => emit(TasksLoaded(tasks)),

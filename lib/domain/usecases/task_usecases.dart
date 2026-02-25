@@ -7,8 +7,8 @@ class GetTasksUseCase {
   final TaskRepository repository;
   GetTasksUseCase(this.repository);
 
-  Future<Either<Failure, List<TaskEntity>>> call(String userId) {
-    return repository.getTasks(userId);
+  Future<Either<Failure, List<TaskEntity>>> call(String userId, {int skip = 0, int limit = 10}) {
+    return repository.getTasks(userId, skip: skip, limit: limit);
   }
 }
 

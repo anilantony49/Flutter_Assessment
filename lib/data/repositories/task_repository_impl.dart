@@ -16,9 +16,9 @@ class TaskRepositoryImpl implements TaskRepository {
   });
 
   @override
-  Future<Either<Failure, List<TaskEntity>>> getTasks(String userId) async {
+  Future<Either<Failure, List<TaskEntity>>> getTasks(String userId, {int skip = 0, int limit = 10}) async {
     try {
-      final remoteTasks = await remoteDataSource.getTasks(userId);
+      final remoteTasks = await remoteDataSource.getTasks(userId, skip: skip, limit: limit);
       await localDataSource.cacheTasks(remoteTasks);
       return Right(remoteTasks);
     } catch (e) {
