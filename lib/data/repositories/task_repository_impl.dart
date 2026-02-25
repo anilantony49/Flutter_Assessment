@@ -16,9 +16,17 @@ class TaskRepositoryImpl implements TaskRepository {
   });
 
   @override
-  Future<Either<Failure, List<TaskEntity>>> getTasks(String userId, {int skip = 0, int limit = 10}) async {
+  Future<Either<Failure, List<TaskEntity>>> getTasks(
+    String userId, {
+    int skip = 0,
+    int limit = 10,
+  }) async {
     try {
-      final remoteTasks = await remoteDataSource.getTasks(userId, skip: skip, limit: limit);
+      final remoteTasks = await remoteDataSource.getTasks(
+        userId,
+        skip: skip,
+        limit: limit,
+      );
       await localDataSource.cacheTasks(remoteTasks, isFirstPage: skip == 0);
       return Right(remoteTasks);
     } catch (e) {
@@ -37,10 +45,14 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, TaskEntity>> createTask(String userId, TaskEntity task) async {
+  Future<Either<Failure, TaskEntity>> createTask(
+    String userId,
+    TaskEntity task,
+  ) async {
     try {
       final taskModel = TaskModel.fromEntity(task);
       final result = await remoteDataSource.createTask(userId, taskModel);
+      await localDataSource.addTask(TaskModel.fromEntity(result));
       return Right(result);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -48,9 +60,14 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<Either<Failure, TaskEntity>> updateTask(String userId, int taskId, Map<String, dynamic> data) async {
+  Future<Either<Failure, TaskEntity>> updateTask(
+    String userId,
+    int taskId,
+    Map<String, dynamic> data,
+  ) async {
     try {
       final result = await remoteDataSource.updateTask(userId, taskId, data);
+      await localDataSource.updateTask(TaskModel.fromEntity(result));
       return Right(result);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -61,6 +78,7 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Either<Failure, void>> deleteTask(String userId, int taskId) async {
     try {
       await remoteDataSource.deleteTask(userId, taskId);
+      await localDataSource.deleteTask(taskId);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

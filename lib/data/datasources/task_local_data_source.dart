@@ -5,6 +5,9 @@ import 'package:sqflite/sqflite.dart';
 abstract class TaskLocalDataSource {
   Future<List<TaskModel>> getTasks();
   Future<void> cacheTasks(List<TaskModel> tasks, {bool isFirstPage = false});
+  Future<void> addTask(TaskModel task);
+  Future<void> updateTask(TaskModel task);
+  Future<void> deleteTask(int taskId);
   Future<void> clearCache();
 }
 
@@ -76,6 +79,33 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
       );
     }
     await batch.commit(noResult: true);
+  }
+
+  @override
+  Future<void> addTask(TaskModel task) async {
+    final db = await database;
+    await db.insert(
+      'tasks',
+      task.toLocalMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
+  Future<void> updateTask(TaskModel task) async {
+    final db = await database;
+    await db.update(
+      'tasks',
+      task.toLocalMap(),
+      where: 'id = ?',
+      whereArgs: [task.id],
+    );
+  }
+
+  @override
+  Future<void> deleteTask(int taskId) async {
+    final db = await database;
+    await db.delete('tasks', where: 'id = ?', whereArgs: [taskId]);
   }
 
   @override
