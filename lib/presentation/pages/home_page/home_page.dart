@@ -22,7 +22,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      // print(user);
       context.read<UserProfileBloc>().add(FetchUserProfileEvent(uid: user.uid));
       context.read<ThemeBloc>().add(LoadThemeEvent());
     }

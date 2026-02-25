@@ -23,21 +23,37 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     required this.syncTasksUseCase,
   }) : super(TaskInitial()) {
     on<LoadTasksEvent>((event, emit) async {
-      emit(TaskLoading());
+      final currentState = state;
+      String filterStatus = 'All';
+      String sortBy = 'Created Date';
+      String searchQuery = '';
+
+      if (currentState is TasksLoaded) {
+        filterStatus = currentState.filterStatus;
+        sortBy = currentState.sortBy;
+        searchQuery = currentState.searchQuery;
+      } else {
+        emit(TaskLoading());
+      }
+
       _currentSkip = 0;
       final result = await getTasksUseCase(
         event.userId,
         skip: 0,
         limit: _limit,
       );
+
       result.fold((failure) => emit(TaskError(failure.message)), (tasks) {
         _currentSkip = tasks.length;
-        final filtered = _applyFilter(tasks, 'All', 'Created Date', '');
+        final filtered = _applyFilter(tasks, filterStatus, sortBy, searchQuery);
         emit(
           TasksLoaded(
             tasks: tasks,
             filteredTasks: filtered,
             hasReachedMax: tasks.length < _limit,
+            filterStatus: filterStatus,
+            sortBy: sortBy,
+            searchQuery: searchQuery,
           ),
         );
       });

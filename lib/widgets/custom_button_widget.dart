@@ -1,5 +1,4 @@
-import 'package:animate_do/animate_do.dart';
-import 'package:flutter/cupertino.dart';
+ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
@@ -23,7 +22,6 @@ class CustomButton extends StatelessWidget {
       child: FilledButton(
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-          // Maintain primary color even when disabled (loading)
           disabledBackgroundColor: theme.colorScheme.primary,
           disabledForegroundColor: theme.colorScheme.onPrimary,
         ),

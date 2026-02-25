@@ -94,8 +94,12 @@ class TaskRepositoryImpl implements TaskRepository {
     if (await networkInfo.isConnected) {
       try {
         final result = await remoteDataSource.createTask(userId, taskModel);
-        await localDataSource.addTask(TaskModel.fromEntity(result));
-        return Right(result);
+        final syncedTask = TaskModel.fromEntity(result).copyWith(
+          createdAt: result.createdAt ?? task.createdAt,
+          updatedAt: result.updatedAt ?? task.updatedAt,
+        );
+        await localDataSource.addTask(syncedTask);
+        return Right(syncedTask);
       } catch (e) {
         return Left(ServerFailure(e.toString()));
       }

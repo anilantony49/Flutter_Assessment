@@ -47,7 +47,7 @@ class AppValidators {
 
   static String? validateOnlyLetters(String? value) {
     if (value == null || value.isEmpty) {
-      return 'This field is required';
+      return null;
     }
     if (RegExp(r'[0-9]').hasMatch(value)) {
       return 'Numbers are not allowed';

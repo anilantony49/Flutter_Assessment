@@ -83,7 +83,7 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   @override
   Future<List<TaskModel>> getTasks() async {
     final db = await database;
-    final result = await db.query('tasks', orderBy: 'id DESC');
+    final result = await db.query('tasks', orderBy: 'created_at DESC');
     return result.map((json) => TaskModel.fromLocalMap(json)).toList();
   }
 
@@ -119,12 +119,33 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   @override
   Future<void> updateTask(TaskModel task) async {
     final db = await database;
-    await db.update(
+
+    // Get existing task to preserve fields not sent from API
+    final existing = await db.query(
       'tasks',
-      task.toLocalMap(),
       where: 'id = ?',
       whereArgs: [task.id],
     );
+
+    if (existing.isNotEmpty) {
+      final existingModel = TaskModel.fromLocalMap(existing.first);
+      final mergedTask = task.copyWith(
+        createdAt: task.createdAt ?? existingModel.createdAt,
+      );
+      await db.update(
+        'tasks',
+        mergedTask.toLocalMap(),
+        where: 'id = ?',
+        whereArgs: [task.id],
+      );
+    } else {
+      await db.update(
+        'tasks',
+        task.toLocalMap(),
+        where: 'id = ?',
+        whereArgs: [task.id],
+      );
+    }
   }
 
   @override

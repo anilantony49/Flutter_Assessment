@@ -25,6 +25,13 @@ class _TaskListPageState extends State<TaskListPage> {
   bool _isConnected = true;
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
+  // Local state to keep UI persistent during non-TasksLoaded states
+  List<TaskEntity> _tasks = [];
+  List<TaskEntity> _filteredTasks = [];
+  String _filterStatus = 'All';
+  String _sortBy = 'Created Date';
+  bool _hasReachedMax = false;
+
   @override
   void initState() {
     super.initState();
@@ -131,12 +138,43 @@ class _TaskListPageState extends State<TaskListPage> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: BlocBuilder<TaskBloc, TaskState>(
-          builder: (context, state) {
-            final tasks = state is TasksLoaded ? state.tasks : [];
-            return Column(
+    return BlocConsumer<TaskBloc, TaskState>(
+      listener: (context, state) {
+        if (state is TaskActionSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else if (state is TaskError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is TasksLoaded) {
+          _tasks = state.tasks;
+          _filteredTasks = state.filteredTasks;
+          _filterStatus = state.filterStatus;
+          _sortBy = state.sortBy;
+          _hasReachedMax = state.hasReachedMax;
+        }
+
+        final tasks = _filteredTasks;
+        final allTasks = _tasks;
+        final filterStatus = _filterStatus;
+        final sortBy = _sortBy;
+        final hasReachedMax = _hasReachedMax;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Column(
               children: [
                 Text(
                   'My Tasks',
@@ -146,9 +184,9 @@ class _TaskListPageState extends State<TaskListPage> {
                     fontSize: 20,
                   ),
                 ),
-                if (tasks.isNotEmpty)
+                if (allTasks.isNotEmpty)
                   Text(
-                    '${tasks.where((t) => !t.isCompleted).length} pending',
+                    '${allTasks.where((t) => !t.isCompleted).length} pending',
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -156,42 +194,16 @@ class _TaskListPageState extends State<TaskListPage> {
                     ),
                   ),
               ],
-            );
-          },
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadTasks),
-        ],
-      ),
-      body: BlocConsumer<TaskBloc, TaskState>(
-        listener: (context, state) {
-          if (state is TaskActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                behavior: SnackBarBehavior.floating,
+            ),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _loadTasks,
               ),
-            );
-          } else if (state is TaskError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.redAccent,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          final tasks = state is TasksLoaded ? state.filteredTasks : [];
-          final filterStatus =
-              state is TasksLoaded ? state.filterStatus : 'All';
-          final sortBy = state is TasksLoaded ? state.sortBy : 'Created Date';
-          final hasReachedMax =
-              state is TasksLoaded ? state.hasReachedMax : false;
-
-          return Column(
+            ],
+          ),
+          body: Column(
             children: [
               if (!_isConnected)
                 Container(
@@ -505,8 +517,7 @@ class _TaskListPageState extends State<TaskListPage> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              if (task.description != null &&
-                                                  task.description!.isNotEmpty)
+                                              if (task.description.isNotEmpty)
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.only(
@@ -514,7 +525,7 @@ class _TaskListPageState extends State<TaskListPage> {
                                                         bottom: 8,
                                                       ),
                                                   child: Text(
-                                                    task.description!,
+                                                    task.description,
                                                     maxLines: 2,
                                                     overflow:
                                                         TextOverflow.ellipsis,
@@ -559,7 +570,10 @@ class _TaskListPageState extends State<TaskListPage> {
                                                     Text(
                                                       DateFormat(
                                                         'MMM d, h:mm a',
-                                                      ).format(task.createdAt!),
+                                                      ).format(
+                                                        task.createdAt!
+                                                            .toLocal(),
+                                                      ),
                                                       style: TextStyle(
                                                         fontSize: 10,
                                                         color: theme
@@ -572,41 +586,41 @@ class _TaskListPageState extends State<TaskListPage> {
                                               ),
                                             ],
                                           ),
-                                          trailing: Transform.scale(
-                                            scale: 1.2,
-                                            child: Checkbox(
-                                              value: task.isCompleted,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                              ),
-                                              activeColor:
-                                                  theme.colorScheme.primary,
-                                              onChanged: (val) {
-                                                if (val != null) {
-                                                  final user =
-                                                      FirebaseAuth
-                                                          .instance
-                                                          .currentUser;
-                                                  if (user != null &&
-                                                      task.id != null) {
-                                                    context
-                                                        .read<TaskBloc>()
-                                                        .add(
-                                                          UpdateTaskEvent(
-                                                            user.uid,
-                                                            task.id!,
-                                                            {
-                                                              'is_completed':
-                                                                  val,
-                                                            },
-                                                          ),
-                                                        );
-                                                  }
-                                                }
-                                              },
-                                            ),
-                                          ),
+                                          // trailing: Transform.scale(
+                                          //   scale: 1.2,
+                                          //   child: Checkbox(
+                                          //     value: task.isCompleted,
+                                          //     shape: RoundedRectangleBorder(
+                                          //       borderRadius:
+                                          //           BorderRadius.circular(6),
+                                          //     ),
+                                          //     activeColor:
+                                          //         theme.colorScheme.primary,
+                                          //     onChanged: (val) {
+                                          //       if (val != null) {
+                                          //         final user =
+                                          //             FirebaseAuth
+                                          //                 .instance
+                                          //                 .currentUser;
+                                          //         if (user != null &&
+                                          //             task.id != null) {
+                                          //           context
+                                          //               .read<TaskBloc>()
+                                          //               .add(
+                                          //                 UpdateTaskEvent(
+                                          //                   user.uid,
+                                          //                   task.id!,
+                                          //                   {
+                                          //                     'is_completed':
+                                          //                         val,
+                                          //                   },
+                                          //                 ),
+                                          //               );
+                                          //         }
+                                          //       }
+                                          //     },
+                                          //   ),
+                                          // ),
                                           onLongPress:
                                               () => _showDeleteDialog(task),
                                           onTap: () => _showTaskDetails(task),
@@ -625,19 +639,21 @@ class _TaskListPageState extends State<TaskListPage> {
                 }(),
               ),
             ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddTaskDialog(),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Add Task',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _showAddTaskDialog(),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Add Task',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -716,7 +732,7 @@ class _TaskListPageState extends State<TaskListPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  task.description ?? 'No description provided.',
+                  task.description,
                   style: TextStyle(
                     fontSize: 16,
                     height: 1.5,
@@ -829,6 +845,7 @@ class _TaskListPageState extends State<TaskListPage> {
     String priority = task.priority;
     String category = task.category;
     DateTime? dueDate = task.dueDate;
+    bool isCompleted = task.isCompleted;
 
     final formKey = GlobalKey<FormState>();
 
@@ -873,7 +890,12 @@ class _TaskListPageState extends State<TaskListPage> {
                                 borderRadius: BorderRadius.circular(15),
                               ),
                             ),
-                            validator: AppValidators.validateOnlyLetters,
+                            validator: (val) {
+                              if (val == null || val.isEmpty) {
+                                return 'Title is required';
+                              }
+                              return AppValidators.validateOnlyLetters(val);
+                            },
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -988,6 +1010,14 @@ class _TaskListPageState extends State<TaskListPage> {
                               child: Text(dueDate == null ? 'Set' : 'Change'),
                             ),
                           ),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Is Completed'),
+                            secondary: const Icon(Icons.check_circle_outline),
+                            value: isCompleted,
+                            onChanged:
+                                (val) => setModalState(() => isCompleted = val),
+                          ),
                           const SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
@@ -1005,7 +1035,13 @@ class _TaskListPageState extends State<TaskListPage> {
                                             descController.text.trim(),
                                         'priority': priority,
                                         'category': category,
-                                        'due_date': dueDate?.toIso8601String(),
+                                        'due_date':
+                                            dueDate?.toUtc().toIso8601String(),
+                                        'is_completed': isCompleted,
+                                        'updated_at':
+                                            DateTime.now()
+                                                .toUtc()
+                                                .toIso8601String(),
                                       }),
                                     );
                                   }
@@ -1128,6 +1164,7 @@ class _TaskListPageState extends State<TaskListPage> {
     String priority = 'Medium';
     String category = 'Others';
     DateTime? dueDate;
+    bool isCompleted = false;
 
     final formKey = GlobalKey<FormState>();
 
@@ -1173,7 +1210,12 @@ class _TaskListPageState extends State<TaskListPage> {
                                 borderRadius: BorderRadius.circular(15),
                               ),
                             ),
-                            validator: AppValidators.validateOnlyLetters,
+                            validator: (val) {
+                              if (val == null || val.isEmpty) {
+                                return 'Title is required';
+                              }
+                              return AppValidators.validateOnlyLetters(val);
+                            },
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
@@ -1283,6 +1325,14 @@ class _TaskListPageState extends State<TaskListPage> {
                               child: Text(dueDate == null ? 'Set' : 'Change'),
                             ),
                           ),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Is Completed'),
+                            secondary: const Icon(Icons.check_circle_outline),
+                            value: isCompleted,
+                            onChanged:
+                                (val) => setModalState(() => isCompleted = val),
+                          ),
                           const SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
@@ -1302,9 +1352,9 @@ class _TaskListPageState extends State<TaskListPage> {
                                               descController.text.trim(),
                                           priority: priority,
                                           category: category,
-                                          isCompleted: false,
-                                          createdAt: DateTime.now(),
-                                          dueDate: dueDate,
+                                          isCompleted: isCompleted,
+                                          createdAt: DateTime.now().toUtc(),
+                                          dueDate: dueDate?.toUtc(),
                                         ),
                                       ),
                                     );

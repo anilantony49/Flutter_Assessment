@@ -48,17 +48,14 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
               .collection('users')
               .doc(event.uid)
               .get();
-      // print(FirebaseAuth.instance.currentUser?.uid);
       if (doc.exists) {
         final userModel = UserModel.fromMap(doc.data(), doc.id);
         emit(UserProfileLoaded(user: userModel));
-        print(userModel);
       } else {
         emit(UserProfileError(message: 'User profile not found.'));
       }
     } catch (e) {
       emit(UserProfileError(message: ErrorHandler.getMessage(e)));
-      print('Error fetching user profile: $e');
     }
   }
 }

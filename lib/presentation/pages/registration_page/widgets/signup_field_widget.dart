@@ -1,6 +1,5 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_assesment/utils/constants.dart';
 import 'package:flutter_assesment/utils/validations.dart';
 import 'package:flutter_assesment/widgets/custom_button_widget.dart';
 import 'package:flutter_assesment/widgets/custom_text_form_fields_widget.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/home_page.dart';
 import 'package:flutter_assesment/presentation/bloc/password_visibility/password_visibility_bloc.dart';
 
-// ignore: must_be_immutable
 class SignUpFieldWidget extends StatefulWidget {
   const SignUpFieldWidget({super.key});
 
@@ -105,7 +103,9 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                           "Join us and start managing your tasks efficiently.",
                           style: TextStyle(
                             fontSize: 16,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
                       ],

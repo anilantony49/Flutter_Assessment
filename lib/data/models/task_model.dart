@@ -17,15 +17,19 @@ class TaskModel extends TaskEntity {
     return TaskModel(
       id: json['id'],
       title: json['title'],
-      description: json['description'],
+      description: json['description']?.toString() ?? '',
       isCompleted: json['is_completed'] is bool
           ? json['is_completed']
           : (json['is_completed'] == 1 || json['is_completed'] == 'true'),
       priority: json['priority'] ?? 'Low',
       category: json['category'] ?? 'Others',
       dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      createdAt: (json['created_at'] != null || json['createdAt'] != null)
+          ? DateTime.parse(json['created_at'] ?? json['createdAt'])
+          : null,
+      updatedAt: (json['updated_at'] != null || json['updatedAt'] != null)
+          ? DateTime.parse(json['updated_at'] ?? json['updatedAt'])
+          : null,
     );
   }
 
@@ -38,6 +42,8 @@ class TaskModel extends TaskEntity {
       'priority': priority,
       'category': category,
       'due_date': dueDate?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
@@ -74,13 +80,38 @@ class TaskModel extends TaskEntity {
     return TaskModel(
       id: map['id'],
       title: map['title'],
-      description: map['description'],
+      description: map['description']?.toString() ?? '',
       isCompleted: map['is_completed'] == 1,
       priority: map['priority'],
       category: map['category'],
       dueDate: map['due_date'] != null ? DateTime.parse(map['due_date']) : null,
       createdAt: map['created_at'] != null ? DateTime.parse(map['created_at']) : null,
       updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
+    );
+  }
+
+  @override
+  TaskModel copyWith({
+    int? id,
+    String? title,
+    String? description,
+    bool? isCompleted,
+    String? priority,
+    String? category,
+    DateTime? dueDate,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return TaskModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      isCompleted: isCompleted ?? this.isCompleted,
+      priority: priority ?? this.priority,
+      category: category ?? this.category,
+      dueDate: dueDate ?? this.dueDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

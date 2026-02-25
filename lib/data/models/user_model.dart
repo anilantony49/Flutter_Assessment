@@ -17,13 +17,9 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic>? data, String documentId) {
     if (data == null) {
-      return UserModel(
-        uid: documentId,
-        fullName: 'Unknown',
-        email: 'Unknown',
-      );
+      return UserModel(uid: documentId, fullName: 'Unknown', email: 'Unknown');
     }
-    
+
     DateTime? parsedCreatedAt;
     if (data['createdAt'] != null) {
       if (data['createdAt'] is Timestamp) {
@@ -47,7 +43,10 @@ class UserModel {
       'uid': uid,
       'fullName': fullName,
       'email': email,
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'createdAt':
+          createdAt != null
+              ? Timestamp.fromDate(createdAt!)
+              : FieldValue.serverTimestamp(),
       'themeMode': themeMode,
     };
   }

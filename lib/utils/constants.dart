@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-// const fontWeightW300 = <FontVariation>[FontVariation('wght', 300.0)];
 const fontWeightRegular = <FontVariation>[FontVariation('wght', 400.0)];
 const fontWeightW700 = <FontVariation>[FontVariation('wght', 700.0)];
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_assesment/utils/constants.dart';
- import 'package:page_transition/page_transition.dart';
+import 'package:page_transition/page_transition.dart';
 
 Future<dynamic> nextScreen(BuildContext context, Widget page) {
   return Navigator.push(

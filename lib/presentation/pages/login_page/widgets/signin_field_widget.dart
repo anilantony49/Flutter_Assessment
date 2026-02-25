@@ -1,17 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/presentation/bloc/user_sign_in/sign_in_bloc.dart';
 import 'package:flutter_assesment/utils/alerts_and_navigators.dart';
-import 'package:flutter_assesment/utils/constants.dart';
-import 'package:flutter_assesment/utils/validations.dart';
+ import 'package:flutter_assesment/utils/validations.dart';
 import 'package:flutter_assesment/widgets/custom_button_widget.dart';
 import 'package:flutter_assesment/widgets/custom_text_form_fields_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_assesment/presentation/pages/home_page/home_page.dart';
 
-// ignore: must_be_immutable
 class SignInFieldWidget extends StatefulWidget {
   const SignInFieldWidget({super.key});
 
