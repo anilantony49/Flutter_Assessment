@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/data/models/user_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_assesment/utils/error_handlers.dart';
 
 part 'registration_event.dart';
 part 'registration_state.dart';
@@ -54,17 +55,9 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Unable to create account. Please try again.';
-      if (e.code == 'weak-password') {
-        errorMessage = 'The password provided is too weak.';
-      } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'The account already exists for that email.';
-      } else if (e.message != null) {
-        errorMessage = e.message!;
-      }
-      emit(UserRegistrationErrorState(errorMessage: errorMessage));
+      emit(UserRegistrationErrorState(errorMessage: ErrorHandler.getMessage(e)));
     } catch (e) {
-      emit(UserRegistrationErrorState(errorMessage: e.toString()));
+      emit(UserRegistrationErrorState(errorMessage: ErrorHandler.getMessage(e)));
     }
   }
 }

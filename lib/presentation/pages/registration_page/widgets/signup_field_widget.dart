@@ -109,15 +109,7 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                   CustomTxtFormField(
                     hintText: 'Full name',
                     controller: fullnameController,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return 'Name is required';
-                      }
-                      if (val.length < 2) {
-                        return 'Please enter a valid name';
-                      }
-                      return null;
-                    },
+                    validator: AppValidators.validateFullName,
                   ),
                   kHeight(20),
 
@@ -125,15 +117,7 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                   CustomTxtFormField(
                     hintText: 'Email address',
                     controller: emailController,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return 'Email is required';
-                      }
-                      if (!RegExp(emailRegexPattern).hasMatch(val)) {
-                        return 'Enter a valid email';
-                      }
-                      return null;
-                    },
+                    validator: AppValidators.validateEmail,
                   ),
                   kHeight(20),
 
@@ -143,15 +127,7 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                       return CustomTxtFormField(
                         hintText: 'Password',
                         controller: passwordController,
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return 'Password is required';
-                          }
-                          if (!RegExp(passowrdRegexPattern).hasMatch(val)) {
-                            return 'Passwords should be 8 characters, at least one number and one special character';
-                          }
-                          return null;
-                        },
+                        validator: AppValidators.validatePassword,
                         obscureText: signUpState.isPasswordHidden,
                         suffix: GestureDetector(
                           onTap: () {
@@ -172,20 +148,17 @@ class _SignUpFieldWidgetState extends State<SignUpFieldWidget> {
                   ),
                   kHeight(20),
 
-                  // Confirm passowrd field
+                  // Confirm password field
                   BlocBuilder<PasswordVisibilityBloc, PasswordVisibilityState>(
                     builder: (context, signUpState) {
                       return CustomTxtFormField(
                         hintText: 'Confirm password',
                         controller: confirmPasswordController,
                         validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return 'Password is required';
+                          if (val != passwordController.text) {
+                            return 'Passwords do not match';
                           }
-                          if (!RegExp(passowrdRegexPattern).hasMatch(val)) {
-                            return 'Passwords should be 8 characters, at least one number and one special character';
-                          }
-                          return null;
+                          return AppValidators.validatePassword(val);
                         },
                         obscureText: signUpState.isConfirmPasswordHidden,
                         suffix: GestureDetector(

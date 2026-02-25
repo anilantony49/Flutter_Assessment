@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/data/models/user_model.dart';
+import 'package:flutter_assesment/utils/error_handlers.dart';
 
 part 'user_profile_event.dart';
 part 'user_profile_state.dart';
@@ -29,7 +30,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       emit(UserProfileUpdateSuccess(message: 'Profile updated successfully!'));
       add(FetchUserProfileEvent(uid: event.uid));
     } catch (e) {
-      emit(UserProfileError(message: 'Failed to update user profile: $e'));
+      emit(UserProfileError(message: ErrorHandler.getMessage(e)));
     }
   }
 
@@ -54,7 +55,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         emit(UserProfileError(message: 'User profile not found.'));
       }
     } catch (e) {
-      emit(UserProfileError(message: 'Failed to fetch user profile: $e'));
+      emit(UserProfileError(message: ErrorHandler.getMessage(e)));
       print('Error fetching user profile: $e');
     }
   }

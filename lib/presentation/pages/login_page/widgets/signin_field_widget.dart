@@ -106,16 +106,7 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                   CustomTxtFormField(
                     hintText: 'Email address',
                     controller: emailController,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return 'Email is required';
-                      }
-                      if (!RegExp(emailRegexPattern).hasMatch(val) ||
-                          val.isEmpty) {
-                        return 'Enter a valid email';
-                      }
-                      return null;
-                    },
+                    validator: AppValidators.validateEmail,
                   ),
 
                   kHeight(20),
@@ -139,15 +130,7 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                         color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Password is required';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
+                    validator: AppValidators.validatePassword,
                   ),
 
                   kHeight(25),

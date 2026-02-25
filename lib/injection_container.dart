@@ -14,13 +14,15 @@ final sl = GetIt.instance; // sl: Service Locator
 
 Future<void> init() async {
   // BLoC
-  sl.registerFactory(() => TaskBloc(
-        getTasksUseCase: sl(),
-        createTaskUseCase: sl(),
-        updateTaskUseCase: sl(),
-        deleteTaskUseCase: sl(),
-        syncTasksUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => TaskBloc(
+      getTasksUseCase: sl(),
+      createTaskUseCase: sl(),
+      updateTaskUseCase: sl(),
+      deleteTaskUseCase: sl(),
+      syncTasksUseCase: sl(),
+    ),
+  );
 
   // Use Cases
   sl.registerLazySingleton(() => GetTasksUseCase(sl()));
@@ -30,22 +32,32 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SyncTasksUseCase(sl()));
 
   // Repository
-  sl.registerLazySingleton<TaskRepository>(() => TaskRepositoryImpl(
-        remoteDataSource: sl(),
-        localDataSource: sl(),
-        networkInfo: sl(),
-      ));
+  sl.registerLazySingleton<TaskRepository>(
+    () => TaskRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
 
   // Data Sources
-  sl.registerLazySingleton<TaskRemoteDataSource>(() => TaskRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<TaskLocalDataSource>(() => TaskLocalDataSourceImpl());
+  sl.registerLazySingleton<TaskRemoteDataSource>(
+    () => TaskRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<TaskLocalDataSource>(
+    () => TaskLocalDataSourceImpl(),
+  );
 
   // External
   sl.registerLazySingleton(() => Connectivity());
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-  sl.registerLazySingleton(() => Dio(BaseOptions(
+  sl.registerLazySingleton(
+    () => Dio(
+      BaseOptions(
         baseUrl: ApiConstants.baseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
-      )));
+      ),
+    ),
+  );
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_assesment/utils/error_handlers.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';
@@ -48,24 +49,16 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Unable to login. Please try again.';
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Wrong password provided for that user.';
-      } else if (e.message != null) {
-        errorMessage = e.message!;
-      }
       emit(
         UserSignInErrorState(
-          errorMessage: errorMessage,
+          errorMessage: ErrorHandler.getMessage(e),
           isPasswordHidden: isHidden,
         ),
       );
     } catch (e) {
       emit(
         UserSignInErrorState(
-          errorMessage: e.toString(),
+          errorMessage: ErrorHandler.getMessage(e),
           isPasswordHidden: isHidden,
         ),
       );

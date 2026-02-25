@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/presentation/bloc/user_profile/user_profile_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_assesment/utils/validations.dart';
 
 class ProfileEditPage extends StatefulWidget {
   final String uid;
@@ -141,12 +142,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                                 ? Colors.white.withOpacity(0.05)
                                 : Colors.grey.withOpacity(0.05),
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter your name';
-                            }
-                            return null;
-                          },
+                          validator: AppValidators.validateFullName,
                         ),
                       ),
                       const SizedBox(height: 20),
