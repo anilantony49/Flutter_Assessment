@@ -34,16 +34,17 @@ class _TaskListPageState extends State<TaskListPage> {
     });
 
     // Connectivity listener
-    _connectivitySubscription =
-        Connectivity().onConnectivityChanged.listen((results) {
-          final connected = !results.contains(ConnectivityResult.none);
-          if (connected && !_isConnected) {
-            _syncTasks();
-          }
-          setState(() {
-            _isConnected = connected;
-          });
-        });
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final connected = !results.contains(ConnectivityResult.none);
+      if (connected && !_isConnected) {
+        _syncTasks();
+      }
+      setState(() {
+        _isConnected = connected;
+      });
+    });
   }
 
   @override
@@ -131,9 +132,12 @@ class _TaskListPageState extends State<TaskListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Tasks',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -161,9 +165,11 @@ class _TaskListPageState extends State<TaskListPage> {
         },
         builder: (context, state) {
           final tasks = state is TasksLoaded ? state.filteredTasks : [];
-          final filterStatus = state is TasksLoaded ? state.filterStatus : 'All';
+          final filterStatus =
+              state is TasksLoaded ? state.filterStatus : 'All';
           final sortBy = state is TasksLoaded ? state.sortBy : 'Created Date';
-          final hasReachedMax = state is TasksLoaded ? state.hasReachedMax : false;
+          final hasReachedMax =
+              state is TasksLoaded ? state.hasReachedMax : false;
 
           return Column(
             children: [
@@ -372,7 +378,8 @@ class _TaskListPageState extends State<TaskListPage> {
                                           ).format(task.createdAt!),
                                           style: TextStyle(
                                             fontSize: 10,
-                                            color: Colors.grey[600],
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.6),
                                           ),
                                         ),
                                     ],
@@ -424,100 +431,111 @@ class _TaskListPageState extends State<TaskListPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder:
-          (context) => Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        task.title,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      task.title,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    _buildChip(task.priority, _getPriorityColor(task.priority)),
-                  ],
+                  ),
+                  _buildChip(task.priority, _getPriorityColor(task.priority)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                task.description ?? 'No description provided.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: theme.colorScheme.onSurface,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  task.description ?? 'No description provided.',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.category_outlined,
-                      size: 20,
-                      color: Colors.grey,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.category_outlined,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Category: ${task.category}',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Due Date: ${task.dueDate != null ? DateFormat('MMM d, yyyy').format(task.dueDate!) : "No Due Date"}',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    task.isCompleted
+                        ? Icons.check_circle_outline
+                        : Icons.radio_button_unchecked,
+                    size: 20,
+                    color: task.isCompleted ? Colors.green : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Status: ${task.isCompleted ? "Completed" : "Pending"}',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Edit'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showEditTaskDialog(task);
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    Text('Category: ${task.category}'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.calendar_today,
-                      size: 20,
-                      color: Colors.grey,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Due Date: ${task.dueDate != null ? DateFormat('MMM d, yyyy').format(task.dueDate!) : "No Due Date"}',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      task.isCompleted
-                          ? Icons.check_circle_outline
-                          : Icons.radio_button_unchecked,
-                      size: 20,
-                      color: task.isCompleted ? Colors.green : Colors.orange,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Status: ${task.isCompleted ? "Completed" : "Pending"}',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.edit, size: 18),
-                        label: const Text('Edit'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _showEditTaskDialog(task);
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Close'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
+        );
+      },
     );
   }
 
@@ -548,11 +566,12 @@ class _TaskListPageState extends State<TaskListPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Edit Task',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -651,6 +670,9 @@ class _TaskListPageState extends State<TaskListPage> {
                           dueDate == null
                               ? 'No Due Date Selected'
                               : 'Due Date: ${DateFormat('MMM d, yyyy').format(dueDate!)}',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                         trailing: TextButton(
                           onPressed: () async {
@@ -698,11 +720,12 @@ class _TaskListPageState extends State<TaskListPage> {
                               Navigator.pop(context);
                             }
                           },
-                          child: const Text(
+                          child: Text(
                             'Update Task',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ),
@@ -811,11 +834,12 @@ class _TaskListPageState extends State<TaskListPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Add New Task',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -965,11 +989,12 @@ class _TaskListPageState extends State<TaskListPage> {
                               Navigator.pop(context);
                             }
                           },
-                          child: const Text(
+                          child: Text(
                             'Create Task',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ),

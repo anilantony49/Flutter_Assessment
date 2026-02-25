@@ -1,9 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
- 
 
- 
 class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
@@ -18,9 +16,6 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final loginAuthProvider = context.watch<LoginAuthProvider>();
-    // final registerAuthProvider = context.watch<RegisterAuthProvider>();
-
     var theme = Theme.of(context);
 
     return SizedBox(
@@ -34,23 +29,23 @@ class CustomButton extends StatelessWidget {
           delay: const Duration(milliseconds: 400),
           duration: const Duration(milliseconds: 1000),
           child:
-              // loginAuthProvider.isLoading || registerAuthProvider.isLoading
-              //     ? SizedBox(
-              //       height: 22,
-              //       width: 22,
-              //       child: Center(
-              //         child: CupertinoActivityIndicator(
-              //           radius: 12,
-              //           color: theme.colorScheme.onPrimaryContainer,
-              //         ),
-              //       ),
-              //     )
-              //     : 
-              Text(
+              isLoading
+                  ? SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: Center(
+                      child: CupertinoActivityIndicator(
+                        radius: 10,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                  : Text(
                     buttonText,
                     style: TextStyle(
                       fontSize: 16,
-                      color: theme.colorScheme.onPrimaryContainer,
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
         ),

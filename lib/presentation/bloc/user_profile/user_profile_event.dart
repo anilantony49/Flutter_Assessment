@@ -5,8 +5,9 @@ sealed class UserProfileEvent {}
 
 class FetchUserProfileEvent extends UserProfileEvent {
   final String uid;
+  final bool isRefresh;
 
-  FetchUserProfileEvent({required this.uid});
+  FetchUserProfileEvent({required this.uid, this.isRefresh = false});
 }
 
 class UpdateUserProfileEvent extends UserProfileEvent {

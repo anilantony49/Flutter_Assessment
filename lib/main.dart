@@ -44,9 +44,10 @@ class MyApp extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeState.themeMode,
-            home: FirebaseAuth.instance.currentUser != null
-                ? const HomePage()
-                : const LoginPage(),
+            home:
+                FirebaseAuth.instance.currentUser != null
+                    ? const HomePage()
+                    : const LoginPage(),
           );
         },
       ),

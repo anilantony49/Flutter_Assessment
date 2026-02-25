@@ -154,7 +154,7 @@ class _SignInFieldWidgetState extends State<SignInFieldWidget> {
                       child: Text(
                         'Forget Password?',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                           decoration: TextDecoration.underline,
                         ),
                       ),

@@ -39,7 +39,7 @@ class ActionCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.black,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],

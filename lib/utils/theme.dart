@@ -5,12 +5,14 @@ import 'package:flutter_assesment/utils/constants.dart';
 var mainFont = 'Coco-Gothic-Pro-Alt';
 
 void mySystemTheme(BuildContext context) {
+  final brightness = Theme.of(context).colorScheme.brightness;
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Theme.of(context).colorScheme.brightness,
-      statusBarBrightness: Theme.of(context).colorScheme.brightness,
-      systemNavigationBarColor: Theme.of(context).colorScheme.primaryContainer,
+      statusBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
+      statusBarBrightness: brightness,
+      systemNavigationBarColor: Theme.of(context).colorScheme.surface,
+      systemNavigationBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
     ),
   );
 }
@@ -20,12 +22,14 @@ void changeSystemThemeOnPopup({
   required BuildContext context,
   Color? statusColor,
 }) {
+  final brightness = Theme.of(context).colorScheme.brightness;
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: statusColor ?? Colors.transparent,
-      statusBarIconBrightness: Theme.of(context).colorScheme.brightness,
-      statusBarBrightness: Theme.of(context).colorScheme.brightness,
-      systemNavigationBarColor: color ?? const Color(0xFFb8b7bb),
+      statusBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
+      statusBarBrightness: brightness,
+      systemNavigationBarColor: color ?? Theme.of(context).colorScheme.surface,
+      systemNavigationBarIconBrightness: brightness == Brightness.light ? Brightness.dark : Brightness.light,
     ),
   );
 }
@@ -38,26 +42,23 @@ var lightTheme = ThemeData(
   highlightColor: Colors.transparent,
   splashFactory: NoSplash.splashFactory,
   colorScheme: const ColorScheme(
-    brightness: Brightness.dark,
-    primary: lBlack, // Icon || Text Primary Color
-    onPrimary: lBlue, // Selected Color
-    primaryContainer: lWhite, // Card Color
-    onPrimaryContainer: lWhite, // Button Color
-    secondary: lGray, // Text Color Secondary
-    onSecondary: lLightGrey, // Text Light Color
-    outline: lLightGrey2, // Divider Color
-    outlineVariant: lLightGrey3, // Loading Button & Text Color
-    surface: lLightWhite, // Background Color
-    onSurface: lLightGrey4, // Loading Skelton Color
-    tertiary: lDialog, // For Remove Dialog On Detail
-    onTertiary: lDialog2, // For Remove Dialog On Home
-    // background: lBottom, // For Bottom Sheet On Detail
-    // onBackground: lBottom2, // For Bottom Sheet On Home
-    // surfaceVariant: lPDialog, // For Profile More
-    surfaceTint: lPDialog2, // For User Profile More
+    brightness: Brightness.light,
+    primary: lBlue, // Use Blue as primary brand color
+    onPrimary: lWhite,
+    primaryContainer: lWhite,
+    onPrimaryContainer: lBlack,
+    secondary: lGray,
+    onSecondary: lLightGrey,
+    outline: lLightGrey2,
+    outlineVariant: lLightGrey3,
+    surface: lLightWhite,
+    onSurface: lBlack, // Explicitly black on white surface
+    tertiary: lDialog,
+    onTertiary: lDialog2,
+    surfaceTint: lPDialog2,
     scrim: lLightGrey,
     error: Colors.red,
-    onError: Colors.red,
+    onError: lWhite,
   ),
   listTileTheme: const ListTileThemeData(iconColor: lBlack, textColor: lBlack),
   bottomAppBarTheme: const BottomAppBarTheme(color: lLightWhite),
@@ -102,22 +103,22 @@ var darkTheme = ThemeData(
   splashFactory: NoSplash.splashFactory,
   colorScheme: const ColorScheme(
     brightness: Brightness.dark,
-    primary: lWhite, // Icon || Text Primary Color
-    onPrimary: lBlue, // Selected Color
-    primaryContainer: Color(0xFF1E1E1E), // Card Color
-    onPrimaryContainer: Color(0xFF1E1E1E), // Button Color
-    secondary: lGray, // Text Color Secondary
-    onSecondary: Color(0xFF333333), // Text Light Color
-    outline: Color(0xFF444444), // Divider Color
-    outlineVariant: Color(0xFF555555), // Loading Button & Text Color
-    surface: Color(0xFF121212), // Background Color
-    onSurface: dLightBlueGrey2, // Loading Skelton Color
-    tertiary: lDialog, // For Remove Dialog On Detail
-    onTertiary: lDialog2, // For Remove Dialog On Home
-    surfaceTint: lPDialog2, // For User Profile More
+    primary: lBlue, // Brand color consistent with light theme
+    onPrimary: lWhite,
+    primaryContainer: Color(0xFF1E1E1E),
+    onPrimaryContainer: lWhite,
+    secondary: lGray,
+    onSecondary: Color(0xFF333333),
+    outline: Color(0xFF444444),
+    outlineVariant: Color(0xFF555555),
+    surface: Color(0xFF121212),
+    onSurface: lWhite, // White text on dark background
+    tertiary: lDialog,
+    onTertiary: lDialog2,
+    surfaceTint: lPDialog2,
     scrim: lLightGrey,
     error: Colors.redAccent,
-    onError: Colors.redAccent,
+    onError: lWhite,
   ),
   listTileTheme: const ListTileThemeData(iconColor: lWhite, textColor: lWhite),
   bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xFF1E1E1E)),

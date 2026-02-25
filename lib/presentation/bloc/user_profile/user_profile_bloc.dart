@@ -19,7 +19,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     UpdateUserProfileEvent event,
     Emitter<UserProfileState> emit,
   ) async {
-    emit(UserProfileLoading());
+    emit(UserProfileUpdating());
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -28,7 +28,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
 
       // Emit success state, then fetch profile again to update the UI
       emit(UserProfileUpdateSuccess(message: 'Profile updated successfully!'));
-      add(FetchUserProfileEvent(uid: event.uid));
+      add(FetchUserProfileEvent(uid: event.uid, isRefresh: true));
     } catch (e) {
       emit(UserProfileError(message: ErrorHandler.getMessage(e)));
     }
@@ -38,7 +38,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     FetchUserProfileEvent event,
     Emitter<UserProfileState> emit,
   ) async {
-    emit(UserProfileLoading());
+    if (!event.isRefresh) {
+      emit(UserProfileLoading());
+    }
 
     try {
       final doc =

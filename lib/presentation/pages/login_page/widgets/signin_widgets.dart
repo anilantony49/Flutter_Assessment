@@ -23,7 +23,7 @@ class SignInWidgets {
               TextSpan(
                 text: 'Register.',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: Theme.of(context).colorScheme.primary,
                   decoration: TextDecoration.underline,
                 ),
               ),

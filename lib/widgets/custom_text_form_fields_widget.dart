@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_assesment/utils/constants.dart';
-  
+
 class CustomTxtFormField extends StatelessWidget {
   const CustomTxtFormField({
     super.key,
@@ -56,10 +56,7 @@ class CustomTxtFormField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: BorderSide(
-            color: theme.colorScheme.onPrimary,
-            width: 1.0,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.0),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5.0),

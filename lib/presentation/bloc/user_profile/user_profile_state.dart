@@ -6,6 +6,7 @@ sealed class UserProfileState {}
 class UserProfileInitial extends UserProfileState {}
 
 class UserProfileLoading extends UserProfileState {}
+class UserProfileUpdating extends UserProfileState {}
 
 class UserProfileLoaded extends UserProfileState {
   final UserModel user;

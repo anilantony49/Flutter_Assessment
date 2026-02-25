@@ -26,7 +26,7 @@ class SignUpWidgets {
               TextSpan(
                 text: 'Sign In.',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: Theme.of(context).colorScheme.primary,
                   decoration: TextDecoration.underline,
                 ),
               ),
