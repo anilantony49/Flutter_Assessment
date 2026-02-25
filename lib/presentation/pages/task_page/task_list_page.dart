@@ -132,12 +132,31 @@ class _TaskListPageState extends State<TaskListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'My Tasks',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
+        title: BlocBuilder<TaskBloc, TaskState>(
+          builder: (context, state) {
+            final tasks = state is TasksLoaded ? state.tasks : [];
+            return Column(
+              children: [
+                Text(
+                  'My Tasks',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 20,
+                  ),
+                ),
+                if (tasks.isNotEmpty)
+                  Text(
+                    '${tasks.where((t) => !t.isCompleted).length} pending',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
         centerTitle: true,
         actions: [
@@ -199,14 +218,33 @@ class _TaskListPageState extends State<TaskListPage> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: 'Search by title...',
-                        prefixIcon: const Icon(Icons.search),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: theme.colorScheme.primary.withOpacity(0.6),
+                        ),
                         filled: true,
-                        fillColor: isDark ? Colors.white10 : Colors.grey[100],
+                        fillColor:
+                            isDark
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.grey[100],
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(30),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(
+                            color: theme.colorScheme.primary.withOpacity(0.2),
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 0,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -280,12 +318,24 @@ class _TaskListPageState extends State<TaskListPage> {
                       child: ListView(
                         children: [
                           const SizedBox(height: 100),
+                          Icon(
+                            Icons.assignment_turned_in_outlined,
+                            size: 80,
+                            color: theme.colorScheme.primary.withOpacity(0.2),
+                          ),
+                          const SizedBox(height: 16),
                           Center(
                             child: Text(
                               _searchController.text.isEmpty &&
                                       filterStatus == 'All'
                                   ? 'No tasks found. Add some!'
                                   : 'No matching tasks found.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.6,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -310,101 +360,166 @@ class _TaskListPageState extends State<TaskListPage> {
                           );
                         }
                         final task = tasks[index];
+                        final priorityColor = _getPriorityColor(task.priority);
                         return FadeInUp(
                           duration: const Duration(milliseconds: 300),
-                          child: Card(
-                            elevation: 0,
+                          child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              side: BorderSide(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
                                 color:
                                     isDark ? Colors.white10 : Colors.grey[200]!,
                               ),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              title: Text(
-                                task.title,
-                                style: TextStyle(
-                                  decoration:
-                                      task.isCompleted
-                                          ? TextDecoration.lineThrough
-                                          : null,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      task.isCompleted
-                                          ? Colors.grey
-                                          : theme.textTheme.titleMedium?.color,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(
+                                    isDark ? 0.2 : 0.05,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (task.description != null &&
-                                      task.description!.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Text(
-                                        task.description!,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color:
-                                              theme.textTheme.bodySmall?.color,
-                                        ),
-                                      ),
-                                    ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      _buildChip(
-                                        task.priority,
-                                        _getPriorityColor(task.priority),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _buildChip(
-                                        task.category,
-                                        Colors.blueGrey,
-                                      ),
-                                      const Spacer(),
-                                      if (task.createdAt != null)
-                                        Text(
-                                          DateFormat(
-                                            'MMM d, h:mm a',
-                                          ).format(task.createdAt!),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  children: [
+                                    Container(width: 4, color: priorityColor),
+                                    Expanded(
+                                      child: ListTile(
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 8,
+                                            ),
+                                        title: Text(
+                                          task.title,
                                           style: TextStyle(
-                                            fontSize: 10,
-                                            color: theme.colorScheme.onSurface
-                                                .withOpacity(0.6),
+                                            decoration:
+                                                task.isCompleted
+                                                    ? TextDecoration.lineThrough
+                                                    : null,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color:
+                                                task.isCompleted
+                                                    ? Colors.grey
+                                                    : theme
+                                                        .textTheme
+                                                        .titleMedium
+                                                        ?.color,
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                ],
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (task.description != null &&
+                                                task.description!.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4,
+                                                  bottom: 8,
+                                                ),
+                                                child: Text(
+                                                  task.description!,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: theme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.color
+                                                        ?.withOpacity(0.7),
+                                                  ),
+                                                ),
+                                              ),
+                                            Row(
+                                              children: [
+                                                _buildChip(
+                                                  task.priority,
+                                                  priorityColor,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                _buildChip(
+                                                  task.category,
+                                                  theme.colorScheme.secondary
+                                                      .withOpacity(0.8),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.access_time,
+                                                  size: 12,
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(0.4),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                if (task.createdAt != null)
+                                                  Text(
+                                                    DateFormat(
+                                                      'MMM d, h:mm a',
+                                                    ).format(task.createdAt!),
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: theme
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withOpacity(0.4),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: Transform.scale(
+                                          scale: 1.2,
+                                          child: Checkbox(
+                                            value: task.isCompleted,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            activeColor:
+                                                theme.colorScheme.primary,
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                final user =
+                                                    FirebaseAuth
+                                                        .instance
+                                                        .currentUser;
+                                                if (user != null &&
+                                                    task.id != null) {
+                                                  context.read<TaskBloc>().add(
+                                                    UpdateTaskEvent(
+                                                      user.uid,
+                                                      task.id!,
+                                                      {'is_completed': val},
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        onLongPress:
+                                            () => _showDeleteDialog(task),
+                                        onTap: () => _showTaskDetails(task),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              trailing: Checkbox(
-                                value: task.isCompleted,
-                                shape: const CircleBorder(),
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    final user =
-                                        FirebaseAuth.instance.currentUser;
-                                    if (user != null && task.id != null) {
-                                      context.read<TaskBloc>().add(
-                                        UpdateTaskEvent(user.uid, task.id!, {
-                                          'is_completed': val,
-                                        }),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                              onLongPress: () => _showDeleteDialog(task),
-                              onTap: () => _showTaskDetails(task),
                             ),
                           ),
                         );
@@ -417,10 +532,15 @@ class _TaskListPageState extends State<TaskListPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        elevation: 4,
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddTaskDialog(),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Add Task',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
