@@ -21,37 +21,48 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<LoadTasksEvent>((event, emit) async {
       emit(TaskLoading());
       _currentSkip = 0;
-      final result = await getTasksUseCase(event.userId, skip: 0, limit: _limit);
-      result.fold(
-        (failure) => emit(TaskError(failure.message)),
-        (tasks) {
-          _currentSkip = tasks.length;
-          emit(TasksLoaded(
-            tasks: tasks,
-            hasReachedMax: tasks.length < _limit,
-          ));
-        },
+      final result = await getTasksUseCase(
+        event.userId,
+        skip: 0,
+        limit: _limit,
       );
+      result.fold((failure) => emit(TaskError(failure.message)), (tasks) {
+        _currentSkip = tasks.length;
+        emit(TasksLoaded(tasks: tasks, hasReachedMax: tasks.length < _limit));
+      });
     });
 
     on<LoadMoreTasksEvent>((event, emit) async {
       final currentState = state;
-      if (currentState is TasksLoaded && !currentState.hasReachedMax && !currentState.isLoadingMore) {
+      if (currentState is TasksLoaded &&
+          !currentState.hasReachedMax &&
+          !currentState.isLoadingMore) {
         emit(currentState.copyWith(isLoadingMore: true));
 
-        final result = await getTasksUseCase(event.userId, skip: _currentSkip, limit: _limit);
+        final result = await getTasksUseCase(
+          event.userId,
+          skip: _currentSkip,
+          limit: _limit,
+        );
         result.fold(
           (failure) => emit(currentState.copyWith(isLoadingMore: false)),
           (newTasks) {
             if (newTasks.isEmpty) {
-              emit(currentState.copyWith(hasReachedMax: true, isLoadingMore: false));
+              emit(
+                currentState.copyWith(
+                  hasReachedMax: true,
+                  isLoadingMore: false,
+                ),
+              );
             } else {
               _currentSkip += newTasks.length;
-              emit(TasksLoaded(
-                tasks: currentState.tasks + newTasks,
-                hasReachedMax: newTasks.length < _limit,
-                isLoadingMore: false,
-              ));
+              emit(
+                TasksLoaded(
+                  tasks: currentState.tasks + newTasks,
+                  hasReachedMax: newTasks.length < _limit,
+                  isLoadingMore: false,
+                ),
+              );
             }
           },
         );
@@ -60,36 +71,31 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
     on<CreateTaskEvent>((event, emit) async {
       final result = await createTaskUseCase(event.userId, event.task);
-      result.fold(
-        (failure) => emit(TaskError(failure.message)),
-        (task) {
-          add(LoadTasksEvent(event.userId)); // Refresh list
-          emit(TaskActionSuccess('Task created successfully'));
-        },
-      );
+      result.fold((failure) => emit(TaskError(failure.message)), (task) {
+        add(LoadTasksEvent(event.userId)); // Refresh list
+        emit(TaskActionSuccess('Task created successfully'));
+      });
     });
 
     on<UpdateTaskEvent>((event, emit) async {
-      final result = await updateTaskUseCase(event.userId, event.taskId, event.data);
-      result.fold(
-        (failure) => emit(TaskError(failure.message)),
-        (task) {
-          // Instead of full refresh, we could update the local state, but keeping it simple for now
-          add(LoadTasksEvent(event.userId)); 
-          emit(TaskActionSuccess('Task updated successfully'));
-        },
+      final result = await updateTaskUseCase(
+        event.userId,
+        event.taskId,
+        event.data,
       );
+      result.fold((failure) => emit(TaskError(failure.message)), (task) {
+        // Instead of full refresh, we could update the local state, but keeping it simple for now
+        add(LoadTasksEvent(event.userId));
+        emit(TaskActionSuccess('Task updated successfully'));
+      });
     });
 
     on<DeleteTaskEvent>((event, emit) async {
       final result = await deleteTaskUseCase(event.userId, event.taskId);
-      result.fold(
-        (failure) => emit(TaskError(failure.message)),
-        (_) {
-          add(LoadTasksEvent(event.userId)); // Refresh list
-          emit(TaskActionSuccess('Task deleted successfully'));
-        },
-      );
+      result.fold((failure) => emit(TaskError(failure.message)), (_) {
+        add(LoadTasksEvent(event.userId)); // Refresh list
+        emit(TaskActionSuccess('Task deleted successfully'));
+      });
     });
   }
 }

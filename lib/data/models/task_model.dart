@@ -18,7 +18,9 @@ class TaskModel extends TaskEntity {
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      isCompleted: json['is_completed'] ?? false,
+      isCompleted: json['is_completed'] is bool
+          ? json['is_completed']
+          : (json['is_completed'] == 1 || json['is_completed'] == 'true'),
       priority: json['priority'] ?? 'Low',
       category: json['category'] ?? 'Others',
       dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
