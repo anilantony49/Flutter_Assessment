@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 abstract class TaskLocalDataSource {
   Future<List<TaskModel>> getTasks();
-  Future<void> cacheTasks(List<TaskModel> tasks);
+  Future<void> cacheTasks(List<TaskModel> tasks, {bool isFirstPage = false});
   Future<void> clearCache();
 }
 
@@ -50,12 +50,20 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   }
 
   @override
-  Future<void> cacheTasks(List<TaskModel> tasks) async {
+  Future<void> cacheTasks(List<TaskModel> tasks, {bool isFirstPage = false}) async {
     final db = await database;
     final batch = db.batch();
-    batch.delete('tasks');
+    
+    if (isFirstPage) {
+      batch.delete('tasks');
+    }
+    
     for (var task in tasks) {
-      batch.insert('tasks', task.toLocalMap());
+      batch.insert(
+        'tasks', 
+        task.toLocalMap(), 
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
     await batch.commit(noResult: true);
   }

@@ -17,6 +17,13 @@ class LoadTasksEvent extends TaskEvent {
   List<Object?> get props => [userId, skip, limit];
 }
 
+class LoadMoreTasksEvent extends TaskEvent {
+  final String userId;
+  LoadMoreTasksEvent(this.userId);
+  @override
+  List<Object?> get props => [userId];
+}
+
 class CreateTaskEvent extends TaskEvent {
   final String userId;
   final TaskEntity task;
